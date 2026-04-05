@@ -1,0 +1,706 @@
+{
+  "common": {
+    "BasicLightingSupport": "HeadsetEffects",
+    "BodyColors": [
+      "Black"
+    ],
+    "BrightnessLevels": [
+      "0",
+      "10",
+      "20",
+      "30",
+      "40",
+      "50",
+      "60",
+      "70",
+      "80",
+      "90",
+      "100"
+    ],
+    "CanvasParameters": {
+      "extensionParameters": {},
+      "regularParameters": [
+        {
+          "clipRect": {
+            "height": 1653,
+            "width": 1575,
+            "x": 45,
+            "y": 18
+          },
+          "color": "Black",
+          "iconPath": ":/void_usb_white/icons/voidusbwhite.png",
+          "imageIndex": 0,
+          "imagePath": "",
+          "maskPath": "",
+          "viewOption": "MainImage"
+        }
+      ]
+    },
+    "ColorCorrectionRequired": true,
+    "DemoUsbId": {
+      "pid": -3,
+      "vid": -3
+    },
+    "DeviceEnumerator": "Legacy",
+    "DeviceIcon": {
+      "Black": ":/void_usb_white/icons/voidusbwhite.png"
+    },
+    "DeviceMobileImage": {
+      "Black": ":/void_usb_white/mobile/mobile.png"
+    },
+    "DeviceSpecificDefaultActions": {},
+    "DeviceType": "Headset",
+    "EqualizerPresets": [
+      {
+        "enabled": "true",
+        "id": "{ace12c08-a7e1-4a87-8110-555e383ce327}",
+        "linkSliders": false,
+        "name": "Bass Boost",
+        "stages": [
+          "7.1954887218045016",
+          "8.6842105263157947",
+          "6.2481203007518893",
+          "6.2857142857142918",
+          "8.0902255639097724",
+          "8.1052631578947434",
+          "5.4135338345864739",
+          "3.699248120300759",
+          "0.45112781954887282",
+          "0.54135338345864881"
+        ]
+      },
+      {
+        "enabled": "true",
+        "id": "{861c1fd2-fafa-485c-ae46-64fe006e583f}",
+        "linkSliders": false,
+        "name": "Clear Chat",
+        "stages": [
+          "-0.48120300751879702",
+          "-0.1954887218045194",
+          "1.721804511278197",
+          "0.64360902255639374",
+          "2.575939849624056",
+          "8.1954887218045123",
+          "7.5939849624060116",
+          "5.8120300751879839",
+          "1.345864661654135",
+          "1.075187969924823"
+        ]
+      },
+      {
+        "enabled": "true",
+        "id": "{138c0b33-bc2c-42ff-96c8-190328221a5a}",
+        "linkSliders": false,
+        "name": "FPS Competition",
+        "stages": [
+          "-0.68421052631579293",
+          "0.75187969924811426",
+          "6.0526315789473628",
+          "7.1879699248120366",
+          "5.8571428571428577",
+          "4.0526315789473664",
+          "4.3157894736842124",
+          "-0.19548872180451049",
+          "-0.27819548872180461",
+          "-1.000000000000002"
+        ]
+      },
+      {
+        "enabled": "true",
+        "id": "{c1d3947b-493e-42c6-9503-dd63d6c40012}",
+        "linkSliders": false,
+        "name": "Movie Theater",
+        "stages": [
+          "5.4962406015037573",
+          "3.69172932330827",
+          "2.0676691729323271",
+          "2.7894736842105239",
+          "4.0526315789473664",
+          "4.7744360902255636",
+          "3.4661654135338349",
+          "0.48872180451127889",
+          "-1.4060150375939851",
+          "-1.601503759398492"
+        ]
+      },
+      {
+        "enabled": "true",
+        "id": "{df65cb3e-f06b-49e4-9376-adba2c0caf6e}",
+        "linkSliders": false,
+        "name": "Pure Direct",
+        "stages": [
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      }
+    ],
+    "FirmwarePackageSourceType": "LegacyHeadsetOldFormat",
+    "FirmwareServerIndex": {
+      "Primary": "VOIDUSB_v1b1c-p1b29"
+    },
+    "FirmwareUpdateRequiresReplug": true,
+    "GeometryChannelCount": 1,
+    "HidProto": "Headset",
+    "HullLayoutMasks": {
+      "Black": [
+        ":/void_usb_white/masks/hullLayoutMask_02.png",
+        ":/void_usb_white/masks/hullLayoutMask_02.png"
+      ]
+    },
+    "ImagesClipRects": {
+      ":/void_usb_white/masks/hullLayoutMask_02.png": {
+        "height": 1653,
+        "width": 1575,
+        "x": 45,
+        "y": 18
+      }
+    },
+    "IndicationCapabilities": {
+      "batteryIndicationLeds": [],
+      "batteryIndicationSupport": "NotSupported",
+      "dpiIndicationLeds": [],
+      "dpiIndicationType": "Endless",
+      "eqPresetChangeWithDolbyOffLightingData": {
+        "color": "#ff0000",
+        "durationMs": 50,
+        "durationOffMs": 500,
+        "lightingLeds": [
+          "Led_HeadsetStatus"
+        ],
+        "repeatCount": -1,
+        "type": "BlinkN"
+      },
+      "eqPresetChangeWithDolbyOnLightingData": {
+        "color": "#00ff00",
+        "durationMs": 50,
+        "durationOffMs": 500,
+        "lightingLeds": [
+          "Led_HeadsetStatus"
+        ],
+        "repeatCount": -1,
+        "type": "BlinkN"
+      },
+      "hasInfomic": true,
+      "hasLimitedProfileIndication": false,
+      "hasSeparateSurroundIndication": false,
+      "hasTiLedDriver": true,
+      "lostConnectionStatusUsbIds": [],
+      "microphoneMutedLightingData": {
+        "leds": [
+          "Led_HeadsetMicMute"
+        ],
+        "pattern": [
+          {
+            "color": "#000000",
+            "timeMs": 0
+          },
+          {
+            "color": "#ff0000",
+            "timeMs": 1200
+          },
+          {
+            "color": "#000000",
+            "timeMs": 1200
+          }
+        ],
+        "repeatCount": -1
+      },
+      "pairingIndicationLeds": [],
+      "powerSavingModeIndicationLeds": [],
+      "sidetoneMutedLightingData": {
+        "leds": [
+          "Led_HeadsetMicMute"
+        ],
+        "pattern": [
+          {
+            "color": "#ff0000",
+            "timeMs": 50
+          },
+          {
+            "color": "#000000",
+            "timeMs": 500
+          },
+          {
+            "color": "#000000",
+            "timeMs": 500
+          },
+          {
+            "color": "#ff0000",
+            "timeMs": 50
+          },
+          {
+            "color": "#000000",
+            "timeMs": 100
+          },
+          {
+            "color": "#ff0000",
+            "timeMs": 50
+          },
+          {
+            "color": "#000000",
+            "timeMs": 100
+          },
+          {
+            "color": "#ff0000",
+            "timeMs": 50
+          },
+          {
+            "color": "#000000",
+            "timeMs": 100
+          }
+        ],
+        "repeatCount": 1
+      },
+      "sidetoneUnmutedLightingData": {
+        "leds": [
+          "Led_HeadsetMicMute"
+        ],
+        "pattern": [
+          {
+            "color": "#ff0000",
+            "timeMs": 50
+          },
+          {
+            "color": "#000000",
+            "timeMs": 100
+          },
+          {
+            "color": "#ff0000",
+            "timeMs": 50
+          },
+          {
+            "color": "#000000",
+            "timeMs": 100
+          },
+          {
+            "color": "#ff0000",
+            "timeMs": 50
+          },
+          {
+            "color": "#000000",
+            "timeMs": 100
+          },
+          {
+            "color": "#000000",
+            "timeMs": 500
+          },
+          {
+            "color": "#ff0000",
+            "timeMs": 50
+          },
+          {
+            "color": "#000000",
+            "timeMs": 500
+          }
+        ],
+        "repeatCount": 1
+      }
+    },
+    "IndicationRealTimeLightingsBufferLeds": [
+      "Led_HeadsetStatus",
+      "Led_HeadsetMicMute"
+    ],
+    "Layouts": {
+      "US": {
+        "bodyImages": {},
+        "keyItems": [
+          {
+            "deviceLinkGeometryIndex": 4,
+            "displayName": "Headset_Action",
+            "geometryIndex": {
+              "Black": "0"
+            },
+            "id": "Headset_Action",
+            "type": "Key",
+            "viewIndex": 0
+          },
+          {
+            "deviceLinkGeometryIndex": 4,
+            "displayName": "Headset_Mic",
+            "geometryIndex": {
+              "Black": "2, 2"
+            },
+            "id": "Headset_Mic",
+            "type": "Key",
+            "viewIndex": 0
+          },
+          {
+            "deviceLinkGeometryIndex": 4,
+            "displayName": "Headset_RightLogo",
+            "geometryIndex": {
+              "Black": "500, 501"
+            },
+            "id": "Headset_RightLogo",
+            "type": "Led",
+            "viewIndex": 0
+          },
+          {
+            "deviceLinkGeometryIndex": 4,
+            "displayName": "Headset_LeftLogo",
+            "geometryIndex": {
+              "Black": "500, 501"
+            },
+            "id": "Headset_LeftLogo",
+            "type": "Led",
+            "viewIndex": 0
+          },
+          {
+            "deviceLinkGeometryIndex": 0,
+            "displayName": "",
+            "geometryIndex": {
+              "Black": "-1, -1"
+            },
+            "id": "Led_HeadsetMicMute",
+            "type": "Led",
+            "viewIndex": 0
+          },
+          {
+            "deviceLinkGeometryIndex": 0,
+            "displayName": "",
+            "geometryIndex": {
+              "Black": "-1, -1"
+            },
+            "id": "Led_HeadsetStatus",
+            "type": "Led",
+            "viewIndex": 0
+          }
+        ],
+        "keyToLedMap": {},
+        "layoutImages": {
+          "Invalid": {
+            "Black": [
+              ":/void_usb_white/body/white_01.jpg",
+              ":/void_usb_white/body/white_02.jpg"
+            ]
+          }
+        },
+        "swLayoutMasks": {}
+      }
+    },
+    "LedColors": [
+      "NotSingleColored"
+    ],
+    "LedGlowMasks": {
+      "500": ":/void_usb_white/masks/01_01.png",
+      "501": ":/void_usb_white/masks/02_01.png"
+    },
+    "LightingBufferWriteDelay": 1,
+    "LightingCommandSupport": "Zone",
+    "LogicalHeight": 512,
+    "LogicalWidth": 512,
+    "MaxBrightnessLevelValue": 69,
+    "MaxLightingsPerLed": 1,
+    "MaxSidetoneLevelValue": 100,
+    "MaxSwLightingLayersCount": 1,
+    "MayNeedK55LegacyUpdateProcessSupportedVersion": {
+      "build": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "MinimumSupportedFirmwareVersion": {
+      "build": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "MinimumSupportedFirmwareVersionForProfileReadWrite": {
+      "build": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "MinimumSupportedFirmwareVersionForWinLockOnOffColor": {
+      "build": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "MultipleDeviceGeometryCellInfo": {
+      "gridCoordinates": {
+        "x": 0,
+        "y": 2
+      },
+      "order": "CentreOfColumn",
+      "priority": 0
+    },
+    "MuteIntervalLevels": [
+      {
+        "interval": 0,
+        "isOn": true
+      },
+      {
+        "interval": 5,
+        "isOn": true
+      },
+      {
+        "interval": 10,
+        "isOn": true
+      },
+      {
+        "interval": 15,
+        "isOn": true
+      },
+      {
+        "interval": 20,
+        "isOn": true
+      },
+      {
+        "interval": 30,
+        "isOn": true
+      },
+      {
+        "interval": 60,
+        "isOn": true
+      },
+      {
+        "interval": 120,
+        "isOn": true
+      },
+      {
+        "interval": 300,
+        "isOn": true
+      },
+      {
+        "interval": 86400,
+        "isOn": false
+      }
+    ],
+    "NeedsWorkaroundSlowStartup": true,
+    "PhysicalKeySize": 130,
+    "PresetPropertyType": "Limited_5",
+    "ProtectedLeds": [
+      "Led_HeadsetMicMute",
+      "Led_HeadsetStatus"
+    ],
+    "ProtocolChain": {
+      "channels": [
+        {
+          "bus": "legacy",
+          "usb-pid": 6953,
+          "usb-vid": 6940
+        }
+      ],
+      "id": "LegacyProtocolFactory.legacyenum.impl.legacydev.cue.corsair.com",
+      "sub": []
+    },
+    "QuickGroups": [
+      "HeadsetLogo"
+    ],
+    "RowSplitSize": {
+      "x": 130,
+      "y": 130
+    },
+    "SdkDeviceType": "Headset",
+    "SidetoneControl": "AudioNode",
+    "StaticGeometryMap": {
+      "Canvas": {
+        "500": [
+          {
+            "x": 1076,
+            "y": 1079
+          },
+          {
+            "x": 1287,
+            "y": 1079
+          },
+          {
+            "x": 1287,
+            "y": 1319
+          },
+          {
+            "x": 1076,
+            "y": 1319
+          }
+        ]
+      },
+      "RegularStatic": {
+        "0": [
+          {
+            "x": 643,
+            "y": 648
+          },
+          {
+            "x": 672,
+            "y": 648
+          },
+          {
+            "x": 677,
+            "y": 640
+          },
+          {
+            "x": 680,
+            "y": 610
+          },
+          {
+            "x": 674,
+            "y": 622
+          },
+          {
+            "x": 662,
+            "y": 640
+          }
+        ],
+        "1": [
+          {
+            "x": 320,
+            "y": 340
+          },
+          {
+            "x": 320,
+            "y": 440
+          },
+          {
+            "x": 440,
+            "y": 440
+          },
+          {
+            "x": 440,
+            "y": 340
+          }
+        ],
+        "2": [
+          {
+            "x": 620,
+            "y": 424
+          },
+          {
+            "x": 651,
+            "y": 435
+          },
+          {
+            "x": 659,
+            "y": 440
+          },
+          {
+            "x": 633,
+            "y": 548
+          },
+          {
+            "x": 595,
+            "y": 561
+          },
+          {
+            "x": 625,
+            "y": 427
+          }
+        ],
+        "3": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 100,
+            "y": 0
+          },
+          {
+            "x": 100,
+            "y": 100
+          },
+          {
+            "x": 0,
+            "y": 100
+          }
+        ],
+        "4": [
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "500": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1657,
+            "y": 0
+          },
+          {
+            "x": 1657,
+            "y": 1700
+          },
+          {
+            "x": 0,
+            "y": 1700
+          }
+        ],
+        "501": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1744,
+            "y": 0
+          },
+          {
+            "x": 1744,
+            "y": 1600
+          },
+          {
+            "x": 0,
+            "y": 1600
+          }
+        ]
+      }
+    },
+    "SupportedLightingImplementations": [
+      "OnDeviceLightings",
+      "DirectLightings"
+    ],
+    "SupportedLightingTypes": {
+      "HeadsetRgb": {
+        "Hardware": [
+          "NoLightingTypeData.lightings.cue.corsair.com",
+          "StaticLightingTypeData.lightings.cue.corsair.com",
+          "BlinkLightingTypeData.lightings.cue.corsair.com",
+          "BreatheLightingTypeData.lightings.cue.corsair.com",
+          "BeatLightingTypeData.lightings.cue.corsair.com",
+          "RainbowPulseLightingTypeData.lightings.cue.corsair.com",
+          "RainbowLightingTypeData.lightings.cue.corsair.com"
+        ],
+        "Software": [
+          "NoLightingTypeData.lightings.cue.corsair.com",
+          "StaticLightingTypeData.lightings.cue.corsair.com",
+          "BlinkLightingTypeData.lightings.cue.corsair.com",
+          "BreatheLightingTypeData.lightings.cue.corsair.com",
+          "BeatLightingTypeData.lightings.cue.corsair.com",
+          "RainbowPulseLightingTypeData.lightings.cue.corsair.com",
+          "RainbowLightingTypeData.lightings.cue.corsair.com"
+        ]
+      }
+    },
+    "SupportsCreateCoolingConfigurations": true,
+    "SupportsDeviceProcessedLighting": true,
+    "SupportsGetHardwareLayout": true,
+    "SupportsLightingManagementInPowerSave": true,
+    "SupportsMicVolume": true,
+    "SurroundType": "Dolby",
+    "SwModelName": "VOID USB",
+    "Thumbnail": {
+      "Black": {
+        "NotSingleColored": ":/void_usb_white/thumbnails/void_rgb_usb_white.png"
+      }
+    },
+    "UsbIds": [
+      {
+        "pid": 6953,
+        "vid": 6940
+      }
+    ],
+    "UserModelName": "VOID USB",
+    "VersionWhereSpecificBrightnessLevelFixed": {
+      "build": 0,
+      "major": 9999,
+      "minor": 0
+    },
+    "XDeviceLightingSupport": "DirectPlaybackOnly"
+  }
+}

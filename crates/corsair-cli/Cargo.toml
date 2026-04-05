@@ -1,0 +1,32 @@
+[package]
+name = "corsair-cli"
+description = "CLI tool for Corsair headset control"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "corsair"
+path = "src/main.rs"
+
+[dependencies]
+corsair-proto = { workspace = true, features = ["serde"] }
+corsair-transport = { workspace = true }
+corsair-device = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
+hidapi = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+# CLI boundary — unwrap/expect are fine with anyhow context.
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "warn", priority = -1 }
+style = { level = "warn", priority = -1 }
+complexity = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }

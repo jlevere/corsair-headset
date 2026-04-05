@@ -1,0 +1,13 @@
+# Build
+target
+web/node_modules
+web/dist
+web/pkg
+web/test-results
+
+# RE workbench (large binaries and analysis output)
+work/
+*.dmg
+
+# Editor
+.direnv

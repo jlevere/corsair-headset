@@ -1,0 +1,635 @@
+{
+  "common": {
+    "BasicLightingSupport": "HeadsetEffects",
+    "BatteryGaugeAvailable": true,
+    "BatteryStatusThresholds": {
+      "100": "Charged",
+      "15": "CriticalLow",
+      "30": "Low",
+      "50": "Medium",
+      "97": "High"
+    },
+    "BodyColors": [
+      "Black"
+    ],
+    "BrightnessDefaultLevel": 33,
+    "BrightnessLevels": [
+      "0",
+      "33",
+      "66",
+      "100"
+    ],
+    "CanvasParameters": {
+      "extensionParameters": {},
+      "regularParameters": [
+        {
+          "clipRect": {
+            "height": 837,
+            "width": 656,
+            "x": 1152,
+            "y": 139
+          },
+          "color": "Black",
+          "iconPath": ":/virtuoso_white/icons/virtuoso_white.png",
+          "imageIndex": 0,
+          "imagePath": "",
+          "maskPath": "",
+          "viewOption": "MainImage"
+        }
+      ]
+    },
+    "ColorCorrectionRequired": true,
+    "DefaultDynamicLightinType": "Virtuoso",
+    "DemoUsbId": {
+      "pid": -3,
+      "vid": -3
+    },
+    "DependsOnDongleManifest": true,
+    "DeviceEnumerator": "Hid",
+    "DeviceIcon": {
+      "Black": ":/virtuoso_white/icons/virtuoso_white.png"
+    },
+    "DeviceMobileImage": {
+      "Black": ":/virtuoso_white/mobile/mobile.png"
+    },
+    "DeviceSpecificDefaultActions": {},
+    "DeviceSpecificIndexToKeyMap": {
+      "difference": {
+        "0": "Headset_Mic"
+      },
+      "prototype": "Empty"
+    },
+    "DeviceSpecificIndexToLedMap": {
+      "difference": {
+        "0": "Led_HeadsetLogo",
+        "1": "Led_HeadsetStatus",
+        "2": "Led_HeadsetMicMute"
+      },
+      "prototype": "Empty"
+    },
+    "DeviceType": "Headset",
+    "DirectLightingsImplementations": [
+      "RealTimeRgbLightings"
+    ],
+    "EqualizerPresets": [
+      {
+        "enabled": "true",
+        "id": "{98b2a687-1f96-4d62-bf3a-f36d6d6ce590}",
+        "linkSliders": false,
+        "name": "Bass Boost",
+        "stages": [
+          "0",
+          "0",
+          "-2",
+          "-6",
+          "-10",
+          "-11",
+          "-9",
+          "-8",
+          "-6",
+          "-2"
+        ]
+      },
+      {
+        "enabled": "true",
+        "id": "{861c1fd2-fafa-485c-ae46-64fe006e583f}",
+        "linkSliders": false,
+        "name": "Clear Chat",
+        "stages": [
+          "-0.48120300751879702",
+          "-0.1954887218045194",
+          "1.721804511278197",
+          "0.64360902255639374",
+          "2.575939849624056",
+          "8.1954887218045123",
+          "7.5939849624060116",
+          "5.8120300751879839",
+          "1.345864661654135",
+          "1.075187969924823"
+        ]
+      },
+      {
+        "enabled": "true",
+        "id": "{138c0b33-bc2c-42ff-96c8-190328221a5a}",
+        "linkSliders": false,
+        "name": "FPS Competition",
+        "stages": [
+          "-0.68421052631579293",
+          "0.75187969924811426",
+          "6.0526315789473628",
+          "7.1879699248120366",
+          "5.8571428571428577",
+          "4.0526315789473664",
+          "4.3157894736842124",
+          "-0.19548872180451049",
+          "-0.27819548872180461",
+          "-1.000000000000002"
+        ]
+      },
+      {
+        "enabled": "true",
+        "id": "{c1d3947b-493e-42c6-9503-dd63d6c40012}",
+        "linkSliders": false,
+        "name": "Movie Theater",
+        "stages": [
+          "5.4962406015037573",
+          "3.69172932330827",
+          "2.0676691729323271",
+          "2.7894736842105239",
+          "4.0526315789473664",
+          "4.7744360902255636",
+          "3.4661654135338349",
+          "0.48872180451127889",
+          "-1.4060150375939851",
+          "-1.601503759398492"
+        ]
+      },
+      {
+        "enabled": "true",
+        "id": "{df65cb3e-f06b-49e4-9376-adba2c0caf6e}",
+        "linkSliders": false,
+        "name": "Pure Direct",
+        "stages": [
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      }
+    ],
+    "FirmwareServerIndex": {
+      "Primary": "VIRTUOSO_v1b1c-p0a43"
+    },
+    "FirmwareUpdateOptions": {
+      "applyFirmwareTimeout": 8000,
+      "imageInfos": {},
+      "method": "Strict",
+      "tool": "BragiHeadsetFwUpdateTool",
+      "writeInOneHunk": true
+    },
+    "FirmwareUpdateRequirements": [
+      "UpdateToMultipointRequiresCompatibleMultipointDevices"
+    ],
+    "GeometryChannelCount": 1,
+    "HasMultipointStatusLabel": "false",
+    "HidProto": "Bragi_headset",
+    "HullLayoutMasks": {
+      "Black": [
+        ":/virtuoso_white/masks/hullLayoutMask_1.png",
+        ":/virtuoso_white/masks/hullLayoutMask_2.png",
+        ":/virtuoso_white/masks/hullLayoutMask_3.png"
+      ]
+    },
+    "ImagesClipRects": {
+      ":/virtuoso_white/masks/hullLayoutMask_1.png": {
+        "height": 837,
+        "width": 656,
+        "x": 1152,
+        "y": 139
+      },
+      ":/virtuoso_white/masks/hullLayoutMask_2.png": {
+        "height": 837,
+        "width": 903,
+        "x": 853,
+        "y": 141
+      },
+      ":/virtuoso_white/masks/hullLayoutMask_3.png": {
+        "height": 830,
+        "width": 691,
+        "x": 1134,
+        "y": 140
+      }
+    },
+    "IndicationCapabilities": {
+      "batteryIndicationLeds": [
+        "Led_HeadsetStatus"
+      ],
+      "batteryIndicationSupport": "HeadsetLightingIndication",
+      "dpiIndicationLeds": [],
+      "dpiIndicationType": "Endless",
+      "hasInfomic": false,
+      "hasLimitedProfileIndication": false,
+      "hasSeparateSurroundIndication": false,
+      "hasTiLedDriver": false,
+      "indicationSpecificLightings": [
+        {
+          "lightingData": {
+            "color": "#000000",
+            "durationMs": 1000,
+            "lightingLeds": [
+              "Led_HeadsetLogo"
+            ],
+            "repeatCount": -1,
+            "type": "Static"
+          },
+          "triggerStatusType": "BatteryStatus",
+          "triggerStatusValue": "BatteryCriticalLow"
+        }
+      ],
+      "lostConnectionStatusUsbIds": [],
+      "microphoneIndicationColors": {
+        "mutedColor": "#ff0000",
+        "unmutedColor": "#00ff00"
+      },
+      "notPairedStatusLightingData": {
+        "color": "#ff0000",
+        "durationMs": 330,
+        "lightingLeds": [],
+        "repeatCount": 354,
+        "type": "RapidBlink"
+      },
+      "pairedStatusLightingData": {
+        "color": "#ffffff",
+        "durationMs": 1000,
+        "lightingLeds": [],
+        "repeatCount": -1,
+        "type": "Static"
+      },
+      "pairingIndicationLeds": [
+        "Led_DongleStatus"
+      ],
+      "pairingStatusLightingData": {
+        "color": "#ffffff",
+        "durationMs": 330,
+        "lightingLeds": [],
+        "repeatCount": -1,
+        "type": "RapidBlink"
+      },
+      "powerSavingModeIndicationLeds": []
+    },
+    "IsWireless": true,
+    "Layouts": {
+      "US": {
+        "bodyImages": {},
+        "keyItems": [
+          {
+            "deviceLinkGeometryIndex": 0,
+            "displayName": "",
+            "geometryIndex": {
+              "Black": "0"
+            },
+            "id": "Headset_Mic",
+            "type": "Key",
+            "viewIndex": 0
+          },
+          {
+            "deviceLinkGeometryIndex": 0,
+            "displayName": "",
+            "geometryIndex": {
+              "Black": "1, 2, 3"
+            },
+            "id": "Led_HeadsetLogo",
+            "type": "Led",
+            "viewIndex": 0
+          },
+          {
+            "deviceLinkGeometryIndex": 0,
+            "displayName": "",
+            "geometryIndex": {
+              "Black": "-1, -1, -1"
+            },
+            "id": "Led_HeadsetStatus",
+            "type": "Led",
+            "viewIndex": 0
+          },
+          {
+            "deviceLinkGeometryIndex": 0,
+            "displayName": "",
+            "geometryIndex": {
+              "Black": "-1, -1, -1"
+            },
+            "id": "Led_HeadsetMicMute",
+            "type": "Led",
+            "viewIndex": 0
+          }
+        ],
+        "keyToLedMap": {},
+        "layoutImages": {
+          "Invalid": {
+            "Black": [
+              ":/virtuoso_white/body/white_1.jpg",
+              ":/virtuoso_white/body/white_2.jpg",
+              ":/virtuoso_white/body/white_3.jpg"
+            ]
+          }
+        },
+        "swLayoutMasks": {}
+      }
+    },
+    "LedColors": [
+      "NotSingleColored"
+    ],
+    "LedGlowMasks": {
+      "1": ":/virtuoso_white/masks/led_mic.png",
+      "2": ":/virtuoso_white/masks/led_2.png",
+      "3": ":/virtuoso_white/masks/led_3.png"
+    },
+    "LightingBufferWriteDelay": 1,
+    "LightingCommandSupport": "Zone",
+    "LogicalHeight": 512,
+    "LogicalWidth": 512,
+    "LowBatteryIntervalLevels": [
+      {
+        "interval": 0,
+        "isOn": true
+      },
+      {
+        "interval": 30,
+        "isOn": true
+      },
+      {
+        "interval": 60,
+        "isOn": true
+      },
+      {
+        "interval": 120,
+        "isOn": true
+      },
+      {
+        "interval": 300,
+        "isOn": true
+      },
+      {
+        "interval": 600,
+        "isOn": true
+      }
+    ],
+    "MaxBrightnessLevelValue": 69,
+    "MaxLightingsPerLed": 1,
+    "MaxSidetoneLevelValue": 100,
+    "MaxSwLightingLayersCount": 1,
+    "MayNeedK55LegacyUpdateProcessSupportedVersion": {
+      "build": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "MinimumSupportedFirmwareVersion": {
+      "build": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "MinimumSupportedFirmwareVersionForProfileReadWrite": {
+      "build": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "MinimumSupportedFirmwareVersionForWinLockOnOffColor": {
+      "build": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "MultipleDeviceGeometryCellInfo": {
+      "gridCoordinates": {
+        "x": 0,
+        "y": 2
+      },
+      "order": "CentreOfColumn",
+      "priority": 0
+    },
+    "MuteIntervalLevels": [
+      {
+        "interval": 0,
+        "isOn": true
+      },
+      {
+        "interval": 5,
+        "isOn": true
+      },
+      {
+        "interval": 10,
+        "isOn": true
+      },
+      {
+        "interval": 15,
+        "isOn": true
+      },
+      {
+        "interval": 20,
+        "isOn": true
+      },
+      {
+        "interval": 30,
+        "isOn": true
+      },
+      {
+        "interval": 60,
+        "isOn": true
+      },
+      {
+        "interval": 120,
+        "isOn": true
+      },
+      {
+        "interval": 300,
+        "isOn": true
+      },
+      {
+        "interval": 86400,
+        "isOn": false
+      }
+    ],
+    "NativeDongle": [
+      {
+        "pid": 2636,
+        "vid": 6940
+      },
+      {
+        "pid": 2628,
+        "vid": 6940
+      }
+    ],
+    "NeedsWorkaroundSlowStartup": true,
+    "OverridenLightingParameters": {
+      "BasicStaticColor": {
+        "colors": [
+          "#98f8fb"
+        ]
+      }
+    },
+    "PairingImplementation": "Direct",
+    "PairingRequirement": "ConnectHeadsetWithSwitcherRequirement",
+    "PhysicalKeySize": 130,
+    "PowerPerformance": [
+      "SleepMode_99min10"
+    ],
+    "PresetPropertyType": "Unlimited",
+    "ProtectedLeds": [
+      "Led_HeadsetStatus",
+      "Led_HeadsetMicMute"
+    ],
+    "ProtocolChain": {
+      "channels": [
+        {
+          "bus": "legacy",
+          "usb-pid": 2627,
+          "usb-vid": 6940
+        }
+      ],
+      "id": "LegacyProtocolFactory.legacyenum.impl.legacydev.cue.corsair.com",
+      "sub": []
+    },
+    "QuickGroups": [
+      "HeadsetLogo"
+    ],
+    "RequiredPingInterval": 60000,
+    "RouterImplementations": [
+      "WirelessRf"
+    ],
+    "RowSplitSize": {
+      "x": 130,
+      "y": 130
+    },
+    "SdkDeviceType": "Headset",
+    "ShowConnectionMode": true,
+    "SidetoneControl": "Hid",
+    "SlipstreamMultipoint": {
+      "mode": "MultipointMode_3",
+      "supportsRestore": "false"
+    },
+    "SlipstreamWizardConnectDeviceImage": ":/virtuoso_xt_t_pain/slipstream/slipstream_wizard_Virtuoso.png",
+    "StaticGeometryMap": {
+      "Canvas": {
+        "1": [
+          {
+            "x": 859,
+            "y": 899
+          },
+          {
+            "x": 882,
+            "y": 899
+          },
+          {
+            "x": 882,
+            "y": 938
+          },
+          {
+            "x": 859,
+            "y": 938
+          }
+        ]
+      },
+      "RegularStatic": {
+        "0": [
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "1": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "2": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 2956,
+            "y": 0
+          },
+          {
+            "x": 2956,
+            "y": 1120
+          },
+          {
+            "x": 0,
+            "y": 1120
+          }
+        ],
+        "3": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 2956,
+            "y": 0
+          },
+          {
+            "x": 2956,
+            "y": 1120
+          },
+          {
+            "x": 0,
+            "y": 1120
+          }
+        ]
+      }
+    },
+    "SupportedLightingImplementations": [
+      "DirectLightings"
+    ],
+    "SupportedLightingTypes": {
+      "BragiHeadsetRgb": {
+        "Hardware": [
+          "RainbowLightingTypeData.lightings.cue.corsair.com",
+          "ColorPulseLightingTypeData.lightings.cue.corsair.com",
+          "ColorShiftLightingTypeData.lightings.cue.corsair.com",
+          "StaticCustomLightingTypeData.lightings.cue.corsair.com",
+          "SolidLightingTypeData.lightings.cue.corsair.com",
+          "GradientLightingTypeData.lightings.cue.corsair.com"
+        ],
+        "Software": [
+          "RainbowLightingTypeData.lightings.cue.corsair.com",
+          "ColorPulseLightingTypeData.lightings.cue.corsair.com",
+          "ColorShiftLightingTypeData.lightings.cue.corsair.com",
+          "StaticCustomLightingTypeData.lightings.cue.corsair.com",
+          "SolidLightingTypeData.lightings.cue.corsair.com",
+          "GradientLightingTypeData.lightings.cue.corsair.com"
+        ]
+      }
+    },
+    "SupportsCreateCoolingConfigurations": true,
+    "SupportsCriticalBatteryLightingPopup": true,
+    "SupportsDisableEncryption": true,
+    "SupportsDisableLedWhenMicActive": true,
+    "SupportsDiscord": true,
+    "SupportsFirmwareDowngrade": false,
+    "SupportsGetBatteryLevel": true,
+    "SupportsGetHardwareLayout": true,
+    "SupportsLightingManagementInPowerSave": true,
+    "SupportsMicVolume": true,
+    "SupportsSeparateDongleFwVersion": true,
+    "SurroundType": "Nahimic",
+    "SwModelName": "VIRTUOSO",
+    "Thumbnail": {
+      "Black": {
+        "NotSingleColored": ":/virtuoso_white/thumbnails/virtuoso_white.png"
+      }
+    },
+    "UsbIds": [
+      {
+        "pid": 2627,
+        "vid": 6940
+      }
+    ],
+    "UserModelName": "VIRTUOSO",
+    "VersionWhereSpecificBrightnessLevelFixed": {
+      "build": 0,
+      "major": 9999,
+      "minor": 0
+    },
+    "XDeviceLightingSupport": "DirectPlaybackOnly"
+  }
+}

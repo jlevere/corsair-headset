@@ -1,0 +1,166 @@
+dylib_name,device_name,usb_vid,usb_pid,paired_pid,protocol,device_type,has_battery,has_sidetone,has_eq,has_lighting
+libdark_core_rgb.dylib,DARK CORE RGB,0x1B1C,0x1B35,,NXP,Mouse,true,false,false,true
+libdark_core_rgb_pro.dylib,DARK CORE PRO,0x1B1C,0x1B80,0x1B81,Bragi,Mouse,true,false,false,true
+libdark_core_rgb_pro_dongle.dylib,DARK CORE PRO WIRELESS RECEIVER,0x1B1C,0x1B81,,Bragi,Dongle,false,false,false,true
+libdark_core_rgb_pro_se.dylib,DARK CORE PRO SE,0x1B1C,0x1B7E,0x1B7F,Bragi,Mouse,true,false,false,true
+libdark_core_rgb_pro_se_dongle.dylib,DARK CORE PRO SE WIRELESS RECEIVER,0x1B1C,0x1B7F,,Bragi,Dongle,false,false,false,true
+libdark_core_se.dylib,DARK CORE SE,0x1B1C,0x1B4B,,NXP,Mouse,true,false,false,true
+libgeneric_headset.dylib,GENERIC HEADSET,0x170D,0x0100,,Legacy,Headset,false,true,false,true
+libglaive_rgb.dylib,GLAIVE RGB,0x1B1C,0x1B34,,NXP,Mouse,false,false,false,true
+libglaive_rgb_pro.dylib,GLAIVE RGB PRO,0x1B1C,0x1B74,,NXP,Mouse,false,false,false,true
+libharpoon_rgb.dylib,HARPOON RGB,0x1B1C,0x1B3C,,NXP,Mouse,false,false,false,true
+libharpoon_rgb_pro.dylib,HARPOON RGB PRO,0x1B1C,0x1B75,,NXP,Mouse,false,false,false,true
+libharpoon_rgb_wireless.dylib,HARPOON RGB WIRELESS,0x1B1C,0x1B5E,0x1B65,Bragi,Mouse,true,false,false,true
+libharpoon_rgb_wireless_dongle.dylib,HARPOON WIRELESS RECEIVER,0x1B1C,0x1B65,,Bragi,Dongle,false,false,false,true
+libhs45_surround.dylib,HS45 SURROUND,0x1B1C,0x0A58,,Legacy,Headset,false,false,true,true
+libhs55_surround.dylib,HS55 SURROUND,0x1B1C,0x0A86,,Legacy,Headset,false,true,true,true
+libhs55_wireless.dylib,HS55 WIRELESS,0x1B1C,0x0A8E,0x0A8F,Bragi,Headset,true,true,true,false
+libhs55_wireless_core.dylib,HS55 WIRELESS CORE,0x1B1C,0x0A94,0x0A95,Bragi,Headset,true,false,false,false
+libhs55_wireless_core_dongle.dylib,HS55 WIRELESS CORE RECEIVER,0x1B1C,0x0A95,,Bragi,Dongle,false,false,false,false
+libhs55_wireless_dongle.dylib,HS55 WIRELESS RECEIVER,0x1B1C,0x0A8F,,Bragi,Dongle,false,false,false,false
+libhs60_pro_surround.dylib,HS60 PRO SURROUND,0x1B1C,0x0A4D,,Legacy,Headset,false,false,true,true
+libhs60_surround.dylib,HS60 SURROUND,0x1B1C,0x0A3B,,Legacy,Headset,false,false,true,true
+libhs65_surround.dylib,HS65 SURROUND,0x1B1C,0x0A87,,Legacy,Headset,false,true,true,true
+libhs65_wireless.dylib,HS65 WIRELESS,0x1B1C,0x0A91,0x0A92,Bragi,Headset,true,true,true,false
+libhs65_wireless_dongle.dylib,HS65 WIRELESS RECEIVER,0x1B1C,0x0A92,,Bragi,Dongle,false,false,false,false
+libhs70_bluetooth.dylib,HS70 BLUETOOTH,0x1B1C,0x0A61,,Legacy,Headset,false,true,true,true
+libhs70_pro_wireless.dylib,HS70 PRO WIRELESS,0x1B1C,0x0A4F,,Legacy,Headset,true,true,true,true
+libhs70_wireless.dylib,HS70 WIRELESS,0x1B1C,0x0A38,,Legacy,Headset,true,true,true,true
+libhs80.dylib,HS80,0x1B1C,0x0A69,0x0A6B,Bragi,Headset,true,true,true,true
+libhs80_dongle.dylib,HS80 WIRELESS RECEIVER,0x1B1C,0x0A6B,,Bragi,Dongle,false,false,false,true
+libhs80_rgb_usb.dylib,HS80 RGB USB,0x1B1C,0x0A88,,Legacy,Headset,false,true,true,true
+libhs80_white.dylib,HS80,0x1B1C,0x0A71,0x0A73,Bragi,Headset,true,true,true,true
+libhs80_white_dongle.dylib,HS80 WIRELESS RECEIVER,0x1B1C,0x0A73,,Bragi,Dongle,false,false,false,true
+libironclaw_rgb.dylib,IRONCLAW RGB,0x1B1C,0x1B5D,,NXP,Mouse,false,false,false,true
+libironclaw_rgb_wireless.dylib,IRONCLAW RGB WIRELESS,0x1B1C,0x1B4C,0x1B66,Bragi,Mouse,true,false,false,true
+libironclaw_rgb_wireless_dongle.dylib,IRONCLAW WIRELESS RECEIVER,0x1B1C,0x1B66,,Bragi,Dongle,false,false,false,true
+libk100_rgb_hr.dylib,K100 RGB,0x1B1C,0x1B7C,,Bragi,Keyboard,false,false,false,true
+libk100_rgb_hr_ss.dylib,K100 RGB,0x1B1C,0x1BC5,,Bragi,Keyboard,false,false,false,true
+libk100_rgb_hs.dylib,K100 RGB,0x1B1C,0x1B7D,,Bragi,Keyboard,false,false,false,true
+libk100_rgb_wireless.dylib,K100 RGB Air Wireless,0x1B1C,0x1BAB,,Bragi,Keyboard,true,false,false,true
+libk55_rgb.dylib,K55 RGB,0x1B1C,0x1B3D,,NXP,Keyboard,false,false,false,true
+libk55_rgb_pro.dylib,K55 RGB PRO,0x1B1C,0x1BA4,,Bragi,Keyboard,false,false,false,true
+libk55_rgb_pro_xt.dylib,K55 RGB PRO XT,0x1B1C,0x1BA1,,Bragi,Keyboard,false,false,false,true
+libk57_harpoon_rgb_wireless_bundle.dylib,K57 HARPOON RGB WIRELESS BUNDLE,0x1B1C,0x1BB0,,Bragi,Dongle,false,false,false,true
+libk57_rgb_wireless.dylib,K57 RGB WIRELESS,0x1B1C,0x1B6E,0x1B62,Bragi,Keyboard,true,false,false,true
+libk57_rgb_wireless_dongle.dylib,K57 WIRELESS RECEIVER,0x1B1C,0x1B62,,Bragi,Dongle,false,false,false,true
+libk60_pro.dylib,K60 PRO,0x1B1C,0x1B83,,Bragi,Keyboard,false,false,false,true
+libk60_rgb_pro.dylib,K60 RGB PRO,0x1B1C,0x1BA0,,Bragi,Keyboard,false,false,false,true
+libk60_rgb_pro_lp.dylib,K60 RGB PRO LP,0x1B1C,0x1BAD,,Bragi,Keyboard,false,false,false,true
+libk60_rgb_pro_se.dylib,K60 RGB PRO SE,0x1B1C,0x1B8D,,Bragi,Keyboard,false,false,false,true
+libk60_rgb_pro_tkl.dylib,K60 PRO TKL RGB,0x1B1C,0x1BC7,,Bragi,Keyboard,false,false,false,true
+libk60_rgb_pro_tkl_white.dylib,K60 PRO TKL RGB,0x1B1C,0x1BED,,Bragi,Keyboard,false,false,false,true
+libk63.dylib,K63,0x1B1C,0x1B40,,NXP,Keyboard,false,false,false,true
+libk63_wireless.dylib,K63 WIRELESS,0x1B1C,0x1B8C,,NXP,Keyboard,true,false,false,true
+libk65_lux_rgb.dylib,K65 LUX RGB,0x1B1C,0x1B37,,NXP,Keyboard,false,false,false,true
+libk65_rgb.dylib,K65 RGB,0x1B1C,0x1B17,,NXP,Keyboard,false,false,false,true
+libk65_rgb_mini.dylib,K65 RGB Mini,0x1B1C,0x1BAF,,Bragi,Keyboard,false,false,false,true
+libk65_rgb_mini_ss.dylib,K65 RGB Mini,0x1B1C,0x1BC3,,Bragi,Keyboard,false,false,false,true
+libk65_rgb_mini_white.dylib,K65 RGB Mini,0x1B1C,0x1BBD,,Bragi,Keyboard,false,false,false,true
+libk65_rgb_mini_white_ss.dylib,K65 RGB Mini,0x1B1C,0x1BCF,,Bragi,Keyboard,false,false,false,true
+libk65_rgb_rapidfire.dylib,K65 RGB RAPIDFIRE,0x1B1C,0x1B39,,NXP,Keyboard,false,false,false,true
+libk66.dylib,K66,0x1B1C,0x1B41,,NXP,Keyboard,false,false,false,false
+libk68.dylib,K68,0x1B1C,0x1B3F,,NXP,Keyboard,false,false,false,true
+libk68_rgb.dylib,K68 RGB,0x1B1C,0x1B4F,,NXP,Keyboard,false,false,false,true
+libk68_se.dylib,K68 SE,0x1B1C,0x1BA5,,NXP,Keyboard,false,false,false,true
+libk70_lux.dylib,K70 LUX,0x1B1C,0x1B36,,NXP,Keyboard,false,false,false,true
+libk70_lux_rgb.dylib,K70 LUX RGB,0x1B1C,0x1B33,,NXP,Keyboard,false,false,false,true
+libk70_rapidfire.dylib,K70 RAPIDFIRE,0x1B1C,0x1B3A,,NXP,Keyboard,false,false,false,true
+libk70_rgb.dylib,K70 RGB,0x1B1C,0x1B13,,NXP,Keyboard,false,false,false,true
+libk70_rgb_mk_2.dylib,K70 RGB MK.2,0x1B1C,0x1B49,,NXP,Keyboard,false,false,false,true
+libk70_rgb_mk_2_ig.dylib,K70 RGB MK.2 IG,0x1B1C,0x1B87,,NXP,Keyboard,false,false,false,true
+libk70_rgb_mk_2_lp.dylib,K70 RGB MK.2 LP,0x1B1C,0x1B55,,NXP,Keyboard,false,false,false,true
+libk70_rgb_mk_2_se.dylib,K70 RGB MK.2 SE,0x1B1C,0x1B6B,,NXP,Keyboard,false,false,false,true
+libk70_rgb_pro.dylib,K70 RGB PRO,0x1B1C,0x1BB3,,Bragi,Keyboard,false,false,false,true
+libk70_rgb_pro_mini.dylib,K70 RGB PRO Mini Wireless,0x1B1C,0x1BB6,,Bragi,Keyboard,true,false,false,true
+libk70_rgb_pro_mini_wireless_white.dylib,K70 RGB PRO Mini Wireless,0x1B1C,0x1BD3,,Bragi,Keyboard,true,false,false,true
+libk70_rgb_pro_optical.dylib,K70 RGB PRO,0x1B1C,0x1BC6,,Bragi,Keyboard,false,false,false,true
+libk70_rgb_pro_optical_white.dylib,K70 RGB PRO,0x1B1C,0x1BD4,,Bragi,Keyboard,false,false,false,true
+libk70_rgb_pro_ss.dylib,K70 RGB PRO,0x1B1C,0x1BC4,,Bragi,Keyboard,false,false,false,true
+libk70_rgb_rapidfire.dylib,K70 RGB RAPIDFIRE,0x1B1C,0x1B38,,NXP,Keyboard,false,false,false,true
+libk70_rgb_se_rapidfire.dylib,K70 RGB SE RAPIDFIRE,0x1B1C,0x1B59,,NXP,Keyboard,false,false,false,true
+libk70_rgb_tkl.dylib,K70 RGB TKL Champion Series,0x1B1C,0x1B73,,Bragi,Keyboard,false,false,false,true
+libk83_wireless.dylib,K83 WIRELESS,0x1B1C,0x1B42,,NXP,Keyboard,true,false,false,true
+libk95_rgb.dylib,K95 RGB,0x1B1C,0x1B11,,NXP,Keyboard,false,false,false,true
+libk95_rgb_platinum.dylib,K95 RGB PLATINUM,0x1B1C,0x1B2D,,NXP,Keyboard,false,false,false,true
+libk95_rgb_platinum_se.dylib,K95 RGB PLATINUM SE,0x1B1C,0x1B82,,NXP,Keyboard,false,false,false,true
+libk95_rgb_platinum_xt.dylib,K95 RGB PLATINUM XT,0x1B1C,0x1B89,,Bragi,Keyboard,false,false,false,true
+libkatar.dylib,KATAR,0x1B1C,0x1B22,,NXP,Mouse,false,false,false,true
+libkatar_elite_wireless.dylib,KATAR ELITE Wireless,0x1B1C,0x1BBA,,Bragi,Mouse,true,false,false,true
+libkatar_pro.dylib,KATAR PRO,0x1B1C,0x1B93,,Bragi,Mouse,false,false,false,true
+libkatar_pro_wireless.dylib,KATAR PRO WIRELESS,0x1B1C,0x1BAE,0x1B94,Bragi,Mouse,true,false,false,true
+libkatar_pro_wireless_dongle.dylib,KATAR PRO WIRELESS RECEIVER,0x1B1C,0x1B94,,Bragi,Dongle,false,false,false,true
+libkatar_pro_xt.dylib,KATAR PRO XT,0x1B1C,0x1BAC,,Bragi,Mouse,false,false,false,true
+libm55_rgb_pro.dylib,M55 RGB PRO,0x1B1C,0x1B70,,Bragi,Mouse,false,false,false,true
+libm65_pro_rgb.dylib,M65 PRO RGB,0x1B1C,0x1B2E,,NXP,Mouse,false,false,false,true
+libm65_rgb.dylib,M65 RGB,0x1B1C,0x1B12,,NXP,Mouse,false,false,false,true
+libm65_rgb_elite.dylib,M65 RGB ELITE,0x1B1C,0x1B5A,,NXP,Mouse,false,false,false,true
+libm65_rgb_elite_ig.dylib,M65 RGB ELITE IG,0x1B1C,0x1B88,,NXP,Mouse,false,false,false,true
+libm65_rgb_ultra.dylib,M65 RGB ULTRA,0x1B1C,0x1B9E,,Bragi,Mouse,false,false,false,true
+libm65_rgb_ultra_wireless.dylib,M65 RGB ULTRA Wireless,0x1B1C,0x1BB5,,Bragi,Mouse,true,false,false,true
+libm65_rgb_ultra_wireless_white.dylib,M65 RGB ULTRA Wireless,0x1B1C,0x1BD6,,Bragi,Mouse,true,false,false,true
+libmm700_rgb.dylib,MM700 RGB,0x1B1C,0x1B9B,,Bragi,MouseMat,false,false,false,true
+libmm700_rgb_galangal.dylib,MM700 RGB,0x1B1C,0x1BC9,,Bragi,MouseMat,false,false,false,true
+libmm800_rgb.dylib,MM800 RGB POLARIS,0x1B1C,0x1B3B,,NXP,MouseMat,false,false,false,true
+libnanoleaf.dylib,NANOLEAF,0x-401,0x-401,,Nanoleaf,Nanoleaf,false,true,false,true
+libnightsword_rgb.dylib,NIGHTSWORD RGB,0x1B1C,0x1B5C,,NXP,Mouse,false,false,false,true
+libsabre.dylib,SABRE,0x1B1C,0x1B32,,NXP,Mouse,false,false,false,true
+libsabre_1.dylib,SABRE RGB OPTICAL,0x1B1C,0x1B14,,NXP,Mouse,false,false,false,true
+libsabre_2.dylib,SABRE RGB LASER,0x1B1C,0x1B19,,NXP,Mouse,false,false,false,true
+libsabre_pro.dylib,SABRE PRO CHAMPION SERIES,0x1B1C,0x1B7A,,Bragi,Mouse,false,false,false,true
+libsabre_rgb.dylib,SABRE RGB,0x1B1C,0x1B2F,,NXP,Mouse,false,false,false,true
+libsabre_rgb_pro.dylib,SABRE RGB PRO CHAMPION SERIES,0x1B1C,0x1B79,,Bragi,Mouse,false,false,false,true
+libsabre_rgb_pro_wireless.dylib,SABRE RGB PRO WIRELESS,0x1B1C,0x1B98,,Bragi,Mouse,true,false,false,true
+libscimitar.dylib,SCIMITAR,0x1B1C,0x1B1E,,NXP,Mouse,false,false,false,true
+libscimitar_elite_rgb.dylib,SCIMITAR RGB ELITE,0x1B1C,0x1B8B,,NXP,Mouse,false,false,false,true
+libscimitar_pro_rgb.dylib,SCIMITAR PRO RGB,0x1B1C,0x1B3E,,NXP,Mouse,false,false,false,true
+libsledge.dylib,K70 RGB TKL Champion Series,0x1B1C,0x1BB9,,Bragi,Keyboard,false,false,false,true
+libslipstream_wireless_dongle.dylib,SLIPSTREAM WIRELESS USB Receiver,0x1B1C,0x1BA6,,Bragi,Dongle,false,false,false,true
+libst100_rgb.dylib,ST100 RGB,0x1B1C,0x0A36,,Legacy,HeadsetStand,false,false,true,true
+libstrafe_1.dylib,STRAFE,0x1B1C,0x1B15,,NXP,Keyboard,false,false,false,true
+libstrafe_2.dylib,STRAFE,0x1B1C,0x1B44,,NXP,Keyboard,false,false,false,true
+libstrafe_rgb.dylib,STRAFE RGB,0x1B1C,0x1B20,,NXP,Keyboard,false,false,false,true
+libstrafe_rgb_mk_2.dylib,STRAFE RGB MK.2,0x1B1C,0x1B48,,NXP,Keyboard,false,false,false,true
+libvirtuoso_black.dylib,VIRTUOSO,0x1B1C,0x0A41,0x0A4A,Bragi,Headset,true,true,true,true
+libvirtuoso_black_dongle.dylib,VIRTUOSO WIRELESS RECEIVER,0x1B1C,0x0A4A,,Bragi,Dongle,false,false,false,true
+libvirtuoso_pearl.dylib,VIRTUOSO,0x1B1C,0x0A5A,0x0A67,Bragi,Headset,true,true,true,true
+libvirtuoso_pearl_dongle.dylib,VIRTUOSO WIRELESS RECEIVER,0x1B1C,0x0A67,,Bragi,Dongle,false,false,false,true
+libvirtuoso_se_brown.dylib,VIRTUOSO SE,0x1B1C,0x0A3F,0x0A48,Bragi,Headset,true,true,true,true
+libvirtuoso_se_brown_dongle.dylib,VIRTUOSO SE WIRELESS RECEIVER,0x1B1C,0x0A48,,Bragi,Dongle,false,false,false,true
+libvirtuoso_se_gunmetal.dylib,VIRTUOSO SE,0x1B1C,0x0A3D,0x0A46,Bragi,Headset,true,true,true,true
+libvirtuoso_se_gunmetal_dongle.dylib,VIRTUOSO SE WIRELESS RECEIVER,0x1B1C,0x0A46,,Bragi,Dongle,false,false,false,true
+libvirtuoso_white.dylib,VIRTUOSO,0x1B1C,0x0A43,0x0A4C,Bragi,Headset,true,true,true,true
+libvirtuoso_white_dongle.dylib,VIRTUOSO WIRELESS RECEIVER,0x1B1C,0x0A4C,,Bragi,Dongle,false,false,false,true
+libvirtuoso_xt_gunmetal.dylib,VIRTUOSO XT,0x1B1C,0x0A62,0x0A64,Bragi,Headset,true,true,true,true
+libvirtuoso_xt_gunmetal_dongle.dylib,VIRTUOSO XT WIRELESS RECEIVER,0x1B1C,0x0A64,,Bragi,Dongle,false,false,false,true
+libvirtuoso_xt_t_pain.dylib,VIRTUOSO XT,0x1B1C,0x0A76,0x0A78,Bragi,Headset,true,true,true,true
+libvirtuoso_xt_t_pain_dongle.dylib,VIRTUOSO XT WIRELESS RECEIVER,0x1B1C,0x0A78,,Bragi,Dongle,false,false,false,true
+libvoid_elite_surround_carbon.dylib,VOID ELITE SURROUND,0x1B1C,0x0A53,,Legacy,Headset,false,true,true,true
+libvoid_elite_surround_cherry.dylib,VOID ELITE SURROUND,0x1B1C,0x0A57,,Legacy,Headset,false,true,true,true
+libvoid_elite_usb_carbon.dylib,VOID ELITE USB,0x1B1C,0x0A52,,Legacy,Headset,false,true,true,true
+libvoid_elite_usb_white.dylib,VOID ELITE USB,0x1B1C,0x0A56,,Legacy,Headset,false,true,true,true
+libvoid_elite_wireless_carbon.dylib,VOID ELITE WIRELESS,0x1B1C,0x0A51,,Legacy,Headset,true,true,true,true
+libvoid_elite_wireless_grey.dylib,VOID ELITE WIRELESS,0x1B1C,0x0A75,,Legacy,Headset,true,true,true,true
+libvoid_elite_wireless_white.dylib,VOID ELITE WIRELESS,0x1B1C,0x0A55,,Legacy,Headset,true,true,true,true
+libvoid_pro_surround_carbon.dylib,VOID PRO SURROUND,0x1B1C,0x0A18,,Legacy,Headset,false,true,true,true
+libvoid_pro_surround_cherry.dylib,VOID PRO SURROUND,0x1B1C,0x0A1E,,Legacy,Headset,false,true,true,true
+libvoid_pro_usb_carbon.dylib,VOID PRO USB,0x1B1C,0x0A17,,Legacy,Headset,false,true,true,true
+libvoid_pro_usb_ig.dylib,VOID PRO USB IG,0x1B1C,0x0A1F,,Legacy,Headset,false,true,true,true
+libvoid_pro_usb_white.dylib,VOID PRO USB,0x1B1C,0x0A1D,,Legacy,Headset,false,true,true,true
+libvoid_pro_wireless_carbon.dylib,VOID PRO WIRELESS,0x1B1C,0x0A14,,Legacy,Headset,true,true,true,true
+libvoid_pro_wireless_se_yellow.dylib,VOID PRO WIRELESS,0x1B1C,0x0A16,,Legacy,Headset,true,true,true,true
+libvoid_pro_wireless_white.dylib,VOID PRO WIRELESS,0x1B1C,0x0A1A,,Legacy,Headset,true,true,true,true
+libvoid_surround_carbon.dylib,VOID SURROUND,0x1B1C,0x0A31,,Legacy,Headset,false,true,true,false
+libvoid_surround_red.dylib,VOID SURROUND,0x1B1C,0x0A30,,Legacy,Headset,false,true,true,false
+libvoid_usb_black_1.dylib,VOID USB,0x1B1C,0x0A0F,,Legacy,Headset,false,true,true,true
+libvoid_usb_black_2.dylib,VOID USB,0x1B1C,0x1B2A,,Legacy,Headset,false,true,true,true
+libvoid_usb_white.dylib,VOID USB,0x1B1C,0x1B29,,Legacy,Headset,false,true,true,true
+libvoid_wireless_black.dylib,VOID WIRELESS,0x1B1C,0x0A0C,,Legacy,Headset,true,true,true,true
+libvoid_wireless_carbon.dylib,VOID WIRELESS,0x1B1C,0x1B27,,Legacy,Headset,true,true,true,true
+libvoid_wireless_white.dylib,VOID WIRELESS,0x1B1C,0x0A2B,,Legacy,Headset,true,true,true,true
+libvoid_wireless_yellow.dylib,VOID WIRELESS,0x1B1C,0x1B23,,Legacy,Headset,true,true,true,true
+libvoyager_a1600_keyboard.dylib,VOYAGER A1600 KEYBOARD,0x1B1C,0x1BD0,,Bragi,Keyboard,false,false,false,true
+libvoyager_a1600_slipstream_module.dylib,VOYAGER A1600 SLIPSTREAM MODULE,0x1B1C,0x0D01,,Bragi,Dongle,false,false,false,true
+libxeneon_32qhd165.dylib,XENEON 32QHD165,0x1B1C,0xF10E,,MCCS,Display,false,true,false,false
+libxeneon_32qhd240.dylib,XENEON 32QHD240,0x1B1C,0x0D08,,MCCS,Display,false,true,false,false
+libxeneon_32uhd144.dylib,XENEON 32UHD144,0x1B1C,0x0D05,,MCCS,Display,false,true,false,false
