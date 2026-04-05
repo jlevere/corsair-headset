@@ -13,7 +13,7 @@
 //! timeout is encoded as a `u16` in minutes. Placeholder until
 //! disassembly of the full header is complete.
 
-use crate::legacy::types::PowerDownState;
+use crate::legacy::types::{PowerDownState, ReportId};
 use crate::report::Report;
 
 /// Encode a set-power-state report (report ID 0xCC).
@@ -36,30 +36,32 @@ pub fn encode_shutdown() -> Report {
     encode_set_power_state(PowerDownState::Shutdown)
 }
 
-/// Encode a set-auto-shutdown-timer report (report ID 0xFF, type 9).
+/// Encode an auto-shutdown trigger report (report ID 0xFF, type 9).
 ///
-/// `timeout_minutes`: auto-shutdown timeout in minutes (0 = disabled).
+/// This is a **trigger**, not a timer configuration. When sent, the headset
+/// beeps and powers down. The host is responsible for tracking inactivity
+/// and deciding when to send this (hence "HostControlled" in the manifest).
 ///
-/// The payload is 10 bytes. The exact sub-command header is TBD and will be
-/// updated once the full `SetAutoShutdownReportLayout` is confirmed from
-/// disassembly. Currently the timeout is placed at bytes 8-9 (LE) with the
-/// preceding bytes zeroed as placeholders.
+/// Header bytes extracted from `LegacyHeadsetResetFeature::Impl::autoShutdown()`
+/// magic constant `0x7003010004ff0008`.
+///
+/// The payload is padded to 63 bytes for the 0xFF feature report.
 #[must_use]
-pub fn encode_set_auto_shutdown(timeout_minutes: u16) -> Report {
-    let [lo, hi] = timeout_minutes.to_le_bytes();
-    let payload: [u8; 10] = [
-        0x00, // placeholder byte 0
-        0x00, // placeholder byte 1
-        0x00, // placeholder byte 2
-        0x00, // placeholder byte 3
-        0x00, // placeholder byte 4
-        0x00, // placeholder byte 5
-        0x00, // placeholder byte 6
-        0x00, // placeholder byte 7
-        lo,   // timeout minutes low byte
-        hi,   // timeout minutes high byte
-    ];
-    Report::with_payload(0xFF, &payload).unwrap_or_else(|| Report::new(0xFF))
+pub fn encode_auto_shutdown_trigger() -> Report {
+    let mut payload = [0u8; super::sidetone::FEATURE_REPORT_PAYLOAD_SIZE];
+    payload[0] = 0x08; // report size
+    // payload[1] = 0x00
+    payload[2] = 0xFF; // report ID echo
+    payload[3] = 0x04;
+    // payload[4] = 0x00
+    payload[5] = 0x01;
+    payload[6] = 0x03;
+    payload[7] = 0x70;
+    payload[8] = 0x07; // beep/mode flag
+    // payload[9] = 0x00
+
+    Report::with_payload(ReportId::Extended as u8, &payload)
+        .unwrap_or_else(|| Report::new(ReportId::Extended as u8))
 }
 
 #[cfg(test)]
@@ -105,26 +107,14 @@ mod tests {
     }
 
     #[test]
-    fn encode_auto_shutdown_payload_size() {
-        let report = encode_set_auto_shutdown(30);
+    fn auto_shutdown_trigger_header() {
+        let report = encode_auto_shutdown_trigger();
         assert_eq!(report.id(), 0xFF);
-        assert_eq!(report.len(), 10);
-    }
-
-    #[test]
-    fn encode_auto_shutdown_timeout_encoding() {
-        let report = encode_set_auto_shutdown(300);
+        assert_eq!(report.len(), 63); // padded to feature report size
         let p = report.payload();
-        // 300 = 0x012C -> LE: [0x2C, 0x01]
-        assert_eq!(p[8], 0x2C);
-        assert_eq!(p[9], 0x01);
-    }
-
-    #[test]
-    fn encode_auto_shutdown_disabled() {
-        let report = encode_set_auto_shutdown(0);
-        let p = report.payload();
-        assert_eq!(p[8], 0x00);
-        assert_eq!(p[9], 0x00);
+        assert_eq!(p[0], 0x08); // report size field
+        assert_eq!(p[2], 0xFF); // report ID echo
+        assert_eq!(p[7], 0x70); // header byte 7
+        assert_eq!(p[8], 0x07); // beep/mode flag
     }
 }

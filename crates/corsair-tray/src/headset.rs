@@ -154,9 +154,13 @@ impl Headset {
         }
     }
 
-    /// Set auto-shutdown timeout (0 = disabled, else minutes).
-    pub fn set_auto_shutdown(&self, minutes: u16) {
-        let report = corsair_proto::legacy::power::encode_set_auto_shutdown(minutes);
+    /// Trigger auto-shutdown (beep + power down).
+    ///
+    /// The VOID Elite uses host-controlled auto-shutoff: the HOST tracks
+    /// inactivity and sends this trigger when idle. The headset beeps
+    /// and powers down.
+    pub fn trigger_shutdown(&self) {
+        let report = corsair_proto::legacy::power::encode_auto_shutdown_trigger();
         let _ = self.device.send_feature_report(&report.wire_bytes());
     }
 

@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 use muda::{CheckMenuItem, Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu};
 use tao::event::Event;
 use tao::event_loop::{ControlFlow, EventLoopBuilder};
-use tray_icon::TrayIconBuilder;
+use tray_icon::{TrayIconBuilder, TrayIconEvent};
 
 mod headset;
 mod icon;
@@ -15,12 +15,11 @@ use headset::{Headset, LinkInfo};
 // Constants
 // ---------------------------------------------------------------------------
 
-/// Poll interval when headset is active and connected.
-const POLL_INTERVAL_ACTIVE: Duration = Duration::from_secs(30);
+/// Poll interval when headset is active.
+const POLL_ACTIVE: Duration = Duration::from_secs(30);
 
-/// Poll interval when headset is disconnected, standby, or searching.
-/// Much slower to avoid unnecessary USB traffic.
-const POLL_INTERVAL_IDLE: Duration = Duration::from_secs(120);
+/// Poll interval when headset is disconnected/standby.
+const POLL_IDLE: Duration = Duration::from_secs(120);
 
 const SIDETONE_LEVELS: &[(u8, &str)] = &[
     (0, "Off"),
@@ -38,12 +37,11 @@ const EQ_PRESETS: &[(u8, &str)] = &[
     (4, "Movie Theater"),
 ];
 
-/// Auto-sleep timeout options (minutes). 0 = disabled.
-const SLEEP_TIMEOUTS: &[(u16, &str)] = &[
+/// Host-side inactivity timeouts (we track this, the headset doesn't).
+const SLEEP_TIMEOUTS: &[(u64, &str)] = &[
     (0, "Never"),
-    (5, "5 minutes"),
-    (15, "15 minutes"),
-    (30, "30 minutes"),
+    (15, "15 min"),
+    (30, "30 min"),
     (60, "1 hour"),
 ];
 
@@ -71,7 +69,7 @@ fn main() -> anyhow::Result<()> {
 
     let menu = Menu::new();
 
-    // Status section (read-only info items, disabled)
+    // Status section (read-only)
     let battery_item = MenuItem::new(format_battery(&state), false, None);
     let mic_item = MenuItem::new(format_mic(&state), false, None);
     let link_item = MenuItem::new(format_link(&state), false, None);
@@ -83,7 +81,7 @@ fn main() -> anyhow::Result<()> {
     menu.append(&fw_item).unwrap();
     menu.append(&PredefinedMenuItem::separator()).unwrap();
 
-    // Sidetone submenu with checkmarks
+    // Sidetone
     let sidetone_sub = Submenu::new("Sidetone", true);
     let mut sidetone_items = Vec::new();
     for &(level, label) in SIDETONE_LEVELS {
@@ -93,7 +91,7 @@ fn main() -> anyhow::Result<()> {
     }
     menu.append(&sidetone_sub).unwrap();
 
-    // EQ preset submenu with checkmarks
+    // EQ
     let eq_sub = Submenu::new("EQ Preset", true);
     let mut eq_items = Vec::new();
     for &(idx, label) in EQ_PRESETS {
@@ -105,7 +103,7 @@ fn main() -> anyhow::Result<()> {
 
     menu.append(&PredefinedMenuItem::separator()).unwrap();
 
-    // Mic mute toggle
+    // Mic mute
     let mic_mute_item = CheckMenuItem::new(
         "Mic Mute",
         true,
@@ -114,13 +112,11 @@ fn main() -> anyhow::Result<()> {
     );
     menu.append(&mic_mute_item).unwrap();
 
-    menu.append(&PredefinedMenuItem::separator()).unwrap();
-
-    // Auto-sleep submenu
+    // Auto-sleep (host-controlled inactivity timer)
     let sleep_sub = Submenu::new("Auto Sleep", true);
     let mut sleep_items = Vec::new();
     for &(mins, label) in SLEEP_TIMEOUTS {
-        let item = CheckMenuItem::new(label, true, mins == 15, None);
+        let item = CheckMenuItem::new(label, true, mins == 0, None);
         sleep_sub.append(&item).unwrap();
         sleep_items.push((item, mins));
     }
@@ -128,10 +124,16 @@ fn main() -> anyhow::Result<()> {
 
     menu.append(&PredefinedMenuItem::separator()).unwrap();
 
+    // Sleep now
+    let sleep_now_item = MenuItem::new("Sleep Now", true, None);
+    menu.append(&sleep_now_item).unwrap();
+
+    menu.append(&PredefinedMenuItem::separator()).unwrap();
+
     let quit_item = MenuItem::new("Quit", true, None);
     menu.append(&quit_item).unwrap();
 
-    // --- Build tray with dual icons ---
+    // --- Build tray ---
 
     let event_loop = EventLoopBuilder::new().build();
     let icon_connected = icon::solid_icon()?;
@@ -140,12 +142,6 @@ fn main() -> anyhow::Result<()> {
     let is_connected = state
         .as_ref()
         .is_some_and(|s| s.link == LinkInfo::Active);
-
-    let initial_icon = if is_connected {
-        &icon_connected
-    } else {
-        &icon_disconnected
-    };
 
     let initial_title = state
         .as_ref()
@@ -156,7 +152,11 @@ fn main() -> anyhow::Result<()> {
         .unwrap_or_else(|| "--".into());
 
     let _tray = TrayIconBuilder::new()
-        .with_icon(initial_icon.clone())
+        .with_icon(if is_connected {
+            icon_connected.clone()
+        } else {
+            icon_disconnected.clone()
+        })
         .with_icon_as_template(true)
         .with_menu(Box::new(menu))
         .with_title(&initial_title)
@@ -167,71 +167,146 @@ fn main() -> anyhow::Result<()> {
 
     let quit_id = quit_item.id().clone();
     let mic_mute_id = mic_mute_item.id().clone();
+    let sleep_now_id = sleep_now_item.id().clone();
 
     let sidetone_ids: Vec<_> = sidetone_items
         .iter()
         .map(|(item, level)| (item.id().clone(), *level))
         .collect();
-
     let eq_ids: Vec<_> = eq_items
         .iter()
         .map(|(item, idx)| (item.id().clone(), *idx))
         .collect();
-
     let sleep_ids: Vec<_> = sleep_items
         .iter()
         .map(|(item, mins)| (item.id().clone(), *mins))
         .collect();
 
     let menu_channel = MenuEvent::receiver();
+    let tray_channel = TrayIconEvent::receiver();
 
-    // --- State tracking ---
+    // --- State ---
 
     let mut last_poll = Instant::now();
-    let mut poll_interval = POLL_INTERVAL_ACTIVE;
+    let mut poll_interval = POLL_ACTIVE;
     let mut was_connected = is_connected;
     let mut notifier = notify::BatteryNotifier::new();
     let mut current_sidetone: u8 = 0;
     let mut current_eq: u8 = 0;
-    let mut current_sleep: u16 = 15;
+    let mut sleep_timeout_mins: u64 = 0; // 0 = disabled
+    let mut last_active = Instant::now();
     let mut mic_muted = false;
+
+    // --- Refresh helper ---
+    let refresh = |headset: &Headset,
+                   tray: &tray_icon::TrayIcon,
+                   battery_item: &MenuItem,
+                   mic_item: &MenuItem,
+                   link_item: &MenuItem,
+                   icon_connected: &tray_icon::Icon,
+                   icon_disconnected: &tray_icon::Icon,
+                   was_connected: &mut bool,
+                   notifier: &mut notify::BatteryNotifier,
+                   mic_muted: &mut bool,
+                   mic_mute_item: &CheckMenuItem|
+     -> Option<Duration> {
+        if let Some(s) = headset.poll_state() {
+            let connected = s.link == LinkInfo::Active;
+
+            if connected != *was_connected {
+                let new_icon = if connected {
+                    icon_connected
+                } else {
+                    icon_disconnected
+                };
+                let _ = tray.set_icon(Some(new_icon.clone()));
+                *was_connected = connected;
+            }
+
+            let title = match s.link {
+                LinkInfo::Active => format!("{}%", s.battery),
+                _ => s.link.label().to_string(),
+            };
+            tray.set_title(Some(&title));
+
+            battery_item.set_text(&format_battery(&Some(s.clone())));
+            mic_item.set_text(&format_mic(&Some(s.clone())));
+            link_item.set_text(&format_link(&Some(s.clone())));
+
+            if s.mic_boom_up != *mic_muted {
+                *mic_muted = s.mic_boom_up;
+                mic_mute_item.set_checked(*mic_muted);
+            }
+
+            notifier.check(s.battery);
+
+            Some(if connected { POLL_ACTIVE } else { POLL_IDLE })
+        } else {
+            tray.set_title(Some("--"));
+            battery_item.set_text("Battery: --");
+            link_item.set_text("Link: Disconnected");
+            if *was_connected {
+                let _ = tray.set_icon(Some(icon_disconnected.clone()));
+                *was_connected = false;
+            }
+            Some(POLL_IDLE)
+        }
+    };
 
     // --- Event loop ---
 
-    #[allow(unused_assignments)] // state vars track across loop iterations
+    #[allow(unused_assignments)]
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::WaitUntil(Instant::now() + Duration::from_millis(100));
 
+        // Poll on tray icon click — instant refresh when user opens the menu
+        if let Ok(TrayIconEvent::Click { .. }) = tray_channel.try_recv() {
+            if let Some(interval) = refresh(
+                &headset,
+                &_tray,
+                &battery_item,
+                &mic_item,
+                &link_item,
+                &icon_connected,
+                &icon_disconnected,
+                &mut was_connected,
+                &mut notifier,
+                &mut mic_muted,
+                &mic_mute_item,
+            ) {
+                poll_interval = interval;
+            }
+            last_poll = Instant::now();
+        }
+
         // Handle menu events
         if let Ok(event) = menu_channel.try_recv() {
-            // Quit
             if event.id == quit_id {
                 *control_flow = ControlFlow::Exit;
                 return;
             }
 
-            // Mic mute toggle
+            if event.id == sleep_now_id {
+                headset.trigger_shutdown();
+                tracing::info!("Sent shutdown trigger");
+            }
+
             if event.id == mic_mute_id {
                 mic_muted = !mic_muted;
                 mic_mute_item.set_checked(mic_muted);
                 headset.set_mic_mute(mic_muted);
-                tracing::info!("Mic mute: {mic_muted}");
             }
 
-            // Sidetone selection
             for (id, level) in &sidetone_ids {
                 if event.id == *id {
                     current_sidetone = *level;
                     headset.set_sidetone(*level);
-                    // Update checkmarks
                     for (item, l) in &sidetone_items {
                         item.set_checked(*l == current_sidetone);
                     }
-                    tracing::info!("Sidetone: {level}%");
                 }
             }
 
-            // EQ preset selection
             for (id, idx) in &eq_ids {
                 if event.id == *id {
                     current_eq = *idx;
@@ -239,19 +314,17 @@ fn main() -> anyhow::Result<()> {
                     for (item, i) in &eq_items {
                         item.set_checked(*i == current_eq);
                     }
-                    tracing::info!("EQ preset: {}", EQ_PRESETS[*idx as usize].1);
                 }
             }
 
-            // Auto-sleep timeout selection
             for (id, mins) in &sleep_ids {
                 if event.id == *id {
-                    current_sleep = *mins;
-                    headset.set_auto_shutdown(*mins);
+                    sleep_timeout_mins = *mins;
+                    last_active = Instant::now();
                     for (item, m) in &sleep_items {
-                        item.set_checked(*m == current_sleep);
+                        item.set_checked(*m == sleep_timeout_mins);
                     }
-                    tracing::info!("Auto sleep: {mins} minutes");
+                    tracing::info!("Auto sleep: {mins} min (0=disabled)");
                 }
             }
         }
@@ -260,52 +333,35 @@ fn main() -> anyhow::Result<()> {
         if let Event::NewEvents(_) = event {
             if last_poll.elapsed() >= poll_interval {
                 last_poll = Instant::now();
+                if let Some(interval) = refresh(
+                    &headset,
+                    &_tray,
+                    &battery_item,
+                    &mic_item,
+                    &link_item,
+                    &icon_connected,
+                    &icon_disconnected,
+                    &mut was_connected,
+                    &mut notifier,
+                    &mut mic_muted,
+                    &mic_mute_item,
+                ) {
+                    poll_interval = interval;
 
-                if let Some(s) = headset.poll_state() {
-                    let connected = s.link == LinkInfo::Active;
-
-                    // Swap icon when connection state changes
-                    if connected != was_connected {
-                        let new_icon = if connected {
-                            &icon_connected
-                        } else {
-                            &icon_disconnected
-                        };
-                        let _ = _tray.set_icon(Some(new_icon.clone()));
-                        was_connected = connected;
+                    // Reset activity timer when headset is active
+                    if was_connected {
+                        last_active = Instant::now();
                     }
+                }
+            }
 
-                    // Update menu bar title
-                    let title = match s.link {
-                        LinkInfo::Active => format!("{}%", s.battery),
-                        _ => s.link.label().to_string(),
-                    };
-                    _tray.set_title(Some(&title));
-
-                    // Update menu items
-                    battery_item.set_text(&format_battery(&Some(s.clone())));
-                    mic_item.set_text(&format_mic(&Some(s.clone())));
-                    link_item.set_text(&format_link(&Some(s.clone())));
-
-                    // Sync mic mute state from hardware
-                    if s.mic_boom_up != mic_muted {
-                        mic_muted = s.mic_boom_up;
-                        mic_mute_item.set_checked(mic_muted);
-                    }
-
-                    // Battery notifications
-                    notifier.check(s.battery);
-
-                    // Back off polling when not actively connected
-                    poll_interval = match s.link {
-                        LinkInfo::Active => POLL_INTERVAL_ACTIVE,
-                        _ => POLL_INTERVAL_IDLE,
-                    };
-                } else {
-                    _tray.set_title(Some("--"));
-                    battery_item.set_text("Battery: --");
-                    link_item.set_text("Link: Disconnected");
-                    poll_interval = POLL_INTERVAL_IDLE;
+            // Host-controlled auto-sleep
+            if sleep_timeout_mins > 0 && was_connected {
+                let timeout = Duration::from_secs(sleep_timeout_mins * 60);
+                if last_active.elapsed() >= timeout {
+                    tracing::info!("Inactivity timeout — triggering shutdown");
+                    headset.trigger_shutdown();
+                    last_active = Instant::now(); // prevent re-triggering
                 }
             }
         }
@@ -313,7 +369,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 // ---------------------------------------------------------------------------
-// Formatting helpers
+// Formatting
 // ---------------------------------------------------------------------------
 
 fn format_battery(state: &Option<headset::HeadsetState>) -> String {
