@@ -3,7 +3,6 @@ name = "corsair-proto"
 description = "Corsair HID protocol types, codec, and feature encode/decode (Legacy + Bragi)"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 
 [features]
 default = ["std"]

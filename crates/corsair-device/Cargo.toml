@@ -3,7 +3,6 @@ name = "corsair-device"
 description = "Corsair device session management, capability discovery, and config"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 
 [dependencies]
 corsair-proto = { workspace = true, features = ["serde"] }

@@ -14,13 +14,8 @@ use headset::{Headset, LinkInfo};
 const POLL_ACTIVE: Duration = Duration::from_secs(30);
 const POLL_IDLE: Duration = Duration::from_secs(120);
 
-const SIDETONE_LEVELS: &[(u8, &str)] = &[
-    (0, "Off"),
-    (25, "25%"),
-    (50, "50%"),
-    (75, "75%"),
-    (100, "100%"),
-];
+// Sidetone is on/off only on VOID Elite (volume is fixed in hardware).
+// Volume control would require CorsairAudioConfigService.
 
 const EQ_PRESETS: &[(u8, &str)] = &[
     (0, "Pure Direct"),
@@ -59,14 +54,8 @@ fn main() -> anyhow::Result<()> {
     menu.append(&fw_item).unwrap();
     menu.append(&PredefinedMenuItem::separator()).unwrap();
 
-    let sidetone_sub = Submenu::new("Sidetone", true);
-    let mut sidetone_items = Vec::new();
-    for &(level, label) in SIDETONE_LEVELS {
-        let item = CheckMenuItem::new(label, true, level == 0, None);
-        sidetone_sub.append(&item).unwrap();
-        sidetone_items.push((item, level));
-    }
-    menu.append(&sidetone_sub).unwrap();
+    let sidetone_item = CheckMenuItem::new("Sidetone", true, true, None);
+    menu.append(&sidetone_item).unwrap();
 
     let eq_sub = Submenu::new("EQ Preset", true);
     let mut eq_items = Vec::new();
@@ -132,7 +121,7 @@ fn main() -> anyhow::Result<()> {
     let quit_id = quit_item.id().clone();
     let mic_mute_id = mic_mute_item.id().clone();
     let sleep_now_id = sleep_now_item.id().clone();
-    let sidetone_ids: Vec<_> = sidetone_items.iter().map(|(i, l)| (i.id().clone(), *l)).collect();
+    let sidetone_id = sidetone_item.id().clone();
     let eq_ids: Vec<_> = eq_items.iter().map(|(i, x)| (i.id().clone(), *x)).collect();
     let sleep_ids: Vec<_> = sleep_items.iter().map(|(i, m)| (i.id().clone(), *m)).collect();
 
@@ -144,7 +133,7 @@ fn main() -> anyhow::Result<()> {
     let mut poll_interval = POLL_ACTIVE;
     let mut was_connected = connected;
     let mut notifier = notify::BatteryNotifier::new();
-    let mut current_sidetone: u8 = 0;
+    let mut sidetone_on = true;
     let mut current_eq: u8 = 0;
     let mut sleep_timeout_mins: u64 = 0;
     let mut last_active = Instant::now();
@@ -179,12 +168,10 @@ fn main() -> anyhow::Result<()> {
                 mic_mute_item.set_checked(mic_muted);
                 headset.set_mic_mute(mic_muted);
             }
-            for (id, level) in &sidetone_ids {
-                if ev.id == *id {
-                    current_sidetone = *level;
-                    headset.set_sidetone(*level);
-                    for (item, l) in &sidetone_items { item.set_checked(*l == current_sidetone); }
-                }
+            if ev.id == sidetone_id {
+                sidetone_on = !sidetone_on;
+                sidetone_item.set_checked(sidetone_on);
+                headset.set_sidetone(sidetone_on);
             }
             for (id, idx) in &eq_ids {
                 if ev.id == *id {

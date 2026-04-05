@@ -2,7 +2,6 @@
 
 use std::time::{Duration, Instant};
 
-use corsair_proto::legacy::sidetone;
 use corsair_proto::legacy::types::{ReportId, ValueId};
 use corsair_proto::Report;
 
@@ -158,14 +157,14 @@ impl Headset {
         })
     }
 
-    /// Set sidetone level (0–100%).
-    pub fn set_sidetone(&mut self, percent: u8) {
-        if let Some(device) = &self.device {
-            let report = sidetone::encode_set_sidetone_level(percent);
-            if device.send_feature_report(&report.wire_bytes()).is_err() {
-                self.handle_disconnect();
-            }
-        }
+    /// Set sidetone on/off.
+    ///
+    /// The VOID Elite has hardware sidetone at a fixed volume level.
+    /// Volume control requires CorsairAudioConfigService (not installed).
+    /// We can only toggle it on/off via HID SetValue.
+    pub fn set_sidetone(&mut self, enabled: bool) {
+        // ValueId 5 = SidetoneState: 0 = on, 1 = muted (inverted!)
+        self.send_set_value(ValueId::SidetoneState, u8::from(!enabled));
     }
 
     /// Set EQ preset index (0–4).

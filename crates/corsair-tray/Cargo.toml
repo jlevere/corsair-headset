@@ -3,7 +3,6 @@ name = "corsair-tray"
 description = "macOS menu bar app for Corsair headset control"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 
 [[bin]]
 name = "corsair-tray"

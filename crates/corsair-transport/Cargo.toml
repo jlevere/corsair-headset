@@ -3,7 +3,6 @@ name = "corsair-transport"
 description = "Platform-agnostic async transport trait + hidapi native backend"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 
 [features]
 default = ["native"]

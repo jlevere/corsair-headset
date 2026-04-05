@@ -3,7 +3,6 @@ name = "corsair-web"
 description = "WASM module for Corsair headset control via WebHID"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
