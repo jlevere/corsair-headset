@@ -209,8 +209,7 @@ impl Headset {
             .device_list()
             .find(|d| d.vendor_id() == 0x1B1C && d.usage_page() == 0xFFC5)?;
 
-        let path = iface.path().to_owned();
-        let device = api.open_path(&path).ok()?;
+        let device = api.open_path(iface.path()).ok()?;
         device.set_blocking_mode(false).ok()?;
         Some(device)
     }

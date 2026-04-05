@@ -13,7 +13,7 @@ fn main() -> anyhow::Result<()> {
         .find(|d| d.vendor_id() == 0x1B1C && d.usage_page() == 0xFFC5)
         .ok_or_else(|| anyhow::anyhow!("No Corsair headset found"))?;
 
-    let device = api.open_path(&iface.path().to_owned())?;
+    let device = api.open_path(iface.path())?;
     device.set_blocking_mode(false)?;
 
     // Always switch to software mode
@@ -117,8 +117,11 @@ fn read(device: &hidapi::HidDevice, id: u8) -> Option<Vec<u8>> {
     let mut buf = [0u8; 65];
     let start = std::time::Instant::now();
     while start.elapsed() < Duration::from_millis(500) {
-        if let Ok(n) = device.read_timeout(&mut buf, 100) {
-            if n >= 1 && buf[0] == id { return Some(buf[..n].to_vec()); }
+        if let Ok(n) = device.read_timeout(&mut buf, 100)
+            && n >= 1
+            && buf[0] == id
+        {
+            return Some(buf[..n].to_vec());
         }
     }
     None
