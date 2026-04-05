@@ -44,7 +44,7 @@ const CMA_MAX_PAIRS: usize = 3;
 
 /// LED zones on the headset.
 ///
-/// Zone IDs match the values used in iCUE's zone manifest (0x213–0x216).
+/// Zone IDs match the values used in the device manifest (0x213–0x216).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]

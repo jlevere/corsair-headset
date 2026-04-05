@@ -97,7 +97,7 @@ pub const FEATURE_REPORT_PAYLOAD_SIZE: usize = 63;
 /// Encode a set-sidetone-level report (report ID 0xFF, feature report).
 ///
 /// The 11-byte sub-command header was extracted from the magic constant
-/// `0x0105010e04ff000b` in iCUE's `setSidetoneLevel` transaction.
+/// `0x0105010e04ff000b` from the protocol's `setSidetoneLevel` transaction.
 /// The remaining bytes are zero-padded to 63 to match the HID descriptor.
 #[must_use]
 pub fn encode_set_sidetone_level(percent: u8) -> Report {

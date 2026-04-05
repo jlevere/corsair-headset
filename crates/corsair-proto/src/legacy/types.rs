@@ -97,10 +97,10 @@ impl ReportId {
 }
 
 // ---------------------------------------------------------------------------
-// Report type enum (matches iCUE's headset_reports::ReportType)
+// Report type enum (matches the headset_reports::ReportType enum)
 // ---------------------------------------------------------------------------
 
-/// Internal report type discriminator matching iCUE's `ReportType` enum.
+/// Internal report type discriminator matching the protocol's `ReportType` enum.
 ///
 /// Multiple types can share the same [`ReportId`] (e.g., types 9, 10, 12, 13
 /// all use report ID 0xFF and are differentiated by sub-command header bytes).
@@ -267,7 +267,7 @@ impl LinkState {
 pub enum OperatingMode {
     /// Hardware mode (normal operation).
     Hardware = 0,
-    /// Software mode (iCUE-controlled).
+    /// Software mode (software-controlled).
     Software = 1,
 }
 

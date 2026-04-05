@@ -60,7 +60,7 @@ impl BatteryStatus {
 pub enum OperatingMode {
     /// Hardware mode (standalone, no host software control).
     Hardware = 0,
-    /// Software mode (iCUE-controlled).
+    /// Software mode (software-controlled).
     Software = 1,
 }
 

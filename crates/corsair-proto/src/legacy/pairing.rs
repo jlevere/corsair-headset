@@ -21,7 +21,7 @@ use crate::report::Report;
 
 /// Encode a start-pairing report (report ID 0xFF, type 12).
 ///
-/// Sends the 3-byte pairing initiation command extracted from iCUE's
+/// Sends the 3-byte pairing initiation command extracted from the protocol's
 /// `sendStartPairingCommand` at `0x1199e0` (`AudioFwHidUtilities`).
 #[must_use]
 pub fn encode_start_pairing() -> Report {

@@ -6,7 +6,7 @@ pub const CONEXANT_VID: u16 = 0x0572;
 /// Conexant default USB Product ID.
 pub const CONEXANT_PID: u16 = 0x1410;
 
-/// CxAudio library version string (from iCUE binary).
+/// CxAudio library version string.
 pub const LIB_VERSION: &str = "1.0.48.0";
 
 /// Maximum retries for CAPE SendCommand polling.

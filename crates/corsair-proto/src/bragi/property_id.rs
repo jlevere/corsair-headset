@@ -1,8 +1,7 @@
 //! Bragi property identifiers.
 //!
 //! Every readable/writable property on a Bragi device is addressed by a
-//! 16-bit [`PropertyId`]. The enum below covers all known IDs extracted
-//! from iCUE.
+//! 16-bit [`PropertyId`]. The enum below covers all known IDs.
 
 /// Numeric property identifier used in Bragi read/write transactions.
 ///

@@ -1,12 +1,12 @@
 # Corsair Headset
 
-A lightweight macOS menu bar app for Corsair wireless headsets. Built in Rust, no iCUE required.
+A lightweight macOS menu bar app for Corsair wireless headsets. Built in Rust, no vendor software required.
 
 ![menu bar](https://img.shields.io/badge/macOS-menu%20bar-black) ![size](https://img.shields.io/badge/binary-2.5MB-green)
 
 ## Why
 
-iCUE is a ~1GB Qt application that installs a kernel extension, an audio daemon, and three background services just to show your battery level and adjust sidetone. This replaces all of that with a single 2.5MB binary.
+Corsair's official software is a ~1GB application that installs a kernel extension, an audio daemon, and three background services just to show your battery level and adjust sidetone. This replaces all of that with a single 2.5MB binary.
 
 ## Features
 
