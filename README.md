@@ -46,22 +46,19 @@ To start at login: System Settings → General → Login Items → add Corsair H
 
 ### Build from source
 
-Requires Rust toolchain, `hidapi`, and `pkg-config`:
-
 ```bash
-brew install hidapi pkg-config
-make app          # builds target/release/Corsair Headset.app
-make dmg          # creates .dmg for distribution
+nix build .#app        # builds the .app bundle in result/Applications/
+nix build .#tray       # just the binary
+nix build .#cli        # CLI tool
+nix flake check        # run tests + clippy
 ```
 
 ## Architecture
 
 ```
 corsair-proto      Protocol codec — Legacy, Bragi, CxAudio (68 tests)
-corsair-transport  Async HID transport — hidapi native + WebHID (planned)
-corsair-device     Device session management (planned)
+corsair-transport  Async HID transport — hidapi native backend
 corsair-tray       macOS menu bar app
 corsair-cli        Command-line tool
-corsair-web        WASM browser app (planned)
 ```
 

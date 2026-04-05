@@ -10,9 +10,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-      - run: brew install hidapi pkg-config
-      - run: cargo clippy --all-targets -- -D warnings
-      - run: cargo test --workspace
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/flake-checker-action@main
+      - run: nix flake check

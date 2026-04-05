@@ -3,10 +3,8 @@ resolver = "2"
 members = [
     "crates/corsair-proto",
     "crates/corsair-transport",
-    "crates/corsair-device",
     "crates/corsair-cli",
     "crates/corsair-tray",
-    "crates/corsair-web",
 ]
 
 [workspace.package]
@@ -23,7 +21,7 @@ edition = "2024"
 # Internal
 corsair-proto = { path = "crates/corsair-proto" }
 corsair-transport = { path = "crates/corsair-transport" }
-corsair-device = { path = "crates/corsair-device" }
+
 
 # Serialization
 serde = { version = "1", features = ["derive"] }
@@ -60,10 +58,3 @@ dirs = "6"
 tao = "0.35"
 tray-icon = "0.22"
 muda = "0.17"
-
-# WASM
-wasm-bindgen = "0.2"
-wasm-bindgen-futures = "0.4"
-web-sys = "0.3"
-js-sys = "0.3"
-serde-wasm-bindgen = "0.6"

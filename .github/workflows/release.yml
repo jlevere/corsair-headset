@@ -13,17 +13,24 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: brew install hidapi pkg-config
+      - uses: DeterminateSystems/nix-installer-action@main
 
-      - name: Run tests
-        run: cargo test --workspace
+      - name: Build .app
+        run: nix build .#app
 
-      - name: Build .app and .dmg
-        run: make release
+      - name: Create DMG
+        run: |
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
+          mkdir -p /tmp/dmg-stage
+          cp -R result/Applications/Corsair\ Headset.app /tmp/dmg-stage/
+          ln -s /Applications /tmp/dmg-stage/Applications
+          hdiutil create -volname "Corsair Headset" \
+            -srcfolder /tmp/dmg-stage \
+            -ov -format UDZO \
+            "Corsair-Headset-${VERSION}.dmg"
 
       - name: Upload DMG
         uses: softprops/action-gh-release@v2
         with:
-          files: target/release/Corsair-Headset-*.dmg
+          files: Corsair-Headset-*.dmg
           generate_release_notes: true
