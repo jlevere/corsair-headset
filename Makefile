@@ -1,6 +1,6 @@
 APP_NAME := Corsair Headset
 BUNDLE_ID := com.jlevere.corsair-headset
-VERSION := 0.3.0
+VERSION := 0.4.0
 
 APP_DIR := target/release/$(APP_NAME).app
 DMG_NAME := Corsair-Headset-$(VERSION).dmg

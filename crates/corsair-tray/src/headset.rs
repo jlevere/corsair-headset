@@ -172,10 +172,6 @@ impl Headset {
         self.send_set_value(ValueId::EqIndex, index);
     }
 
-    /// Toggle mic mute via SetValue.
-    pub fn set_mic_mute(&mut self, muted: bool) {
-        self.send_set_value(ValueId::MicState, u8::from(muted));
-    }
 
     /// Trigger auto-shutdown (beep + power down).
     pub fn trigger_shutdown(&mut self) {

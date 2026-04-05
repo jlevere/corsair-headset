@@ -20,27 +20,48 @@ fn main() -> anyhow::Result<()> {
 
     match cmd {
         "status" => {
-            device.write(&[0xC9, 0x64])?;
-            if let Some(r) = read(&device, 0x64) {
-                let p = &r[1..];
-                println!("State (0x64) raw: {:02X?}", p);
-                if p.len() >= 4 {
-                    let bat = p[1] & 0x7F;
-                    let mic_bit = (p[1] >> 7) & 1;
-                    let link_lo = p[2] & 0x0F;
-                    let link_hi = (p[2] >> 4) & 0x0F;
-                    let bat_st = p[3] & 0x07;
-                    println!("  battery={bat}%  mic_bit={mic_bit}  link_lo={link_lo}  link_hi=0x{link_hi:X}  bat_state={bat_st}");
+            // Dump everything we can read
+            for &(rid, name) in &[
+                (0x64u8, "State"),
+                (0x65, "Mode"),
+                (0x66, "Firmware"),
+                (0x90, "Report 0x90"),
+                (0xC4, "Report 0xC4"),
+                (0xE2, "Report 0xE2"),
+            ] {
+                let _ = device.write(&[0xC9, rid]);
+                std::thread::sleep(Duration::from_millis(100));
+                if let Some(r) = read(&device, rid) {
+                    let p = &r[1..];
+                    print!("{name} (0x{rid:02X}, {}B): ", p.len());
+                    for b in p.iter().take(30) { print!("{b:02X} "); }
+                    if p.len() > 30 { print!("..."); }
+                    println!();
+                } else {
+                    println!("{name} (0x{rid:02X}): no response");
                 }
             }
-            device.write(&[0xC9, 0x66])?;
-            if let Some(r) = read(&device, 0x66) {
-                println!("Firmware (0x66) raw: {:02X?}", &r[1..]);
+
+            // Feature report
+            let mut fbuf = [0u8; 65];
+            fbuf[0] = 0xFF;
+            if let Ok(n) = device.get_feature_report(&mut fbuf) {
+                print!("Feature 0xFF ({}B): ", n - 1);
+                for b in fbuf[1..n].iter().take(20) { print!("{b:02X} "); }
+                println!("...");
+            }
+
+            // Also try reading 0xC4 as feature report (it's both input AND output)
+            let mut c4buf = [0u8; 65];
+            c4buf[0] = 0xC4;
+            if let Ok(n) = device.get_feature_report(&mut c4buf) {
+                print!("Feature 0xC4 ({}B): ", n - 1);
+                for b in c4buf[1..n].iter().take(30) { print!("{b:02X} "); }
+                println!("...");
             }
         }
         "watch" => {
-            println!("Rapid polling — move mic boom, press buttons, etc.");
-            println!("Changed bytes shown in RED. Ctrl+C to stop.\n");
+            println!("Rapid polling — move mic boom, press buttons. Ctrl+C to stop.\n");
             let mut last = Vec::new();
             loop {
                 let _ = device.write(&[0xC9, 0x64]);
@@ -56,8 +77,7 @@ fn main() -> anyhow::Result<()> {
                         }
                         let bat = p[1] & 0x7F;
                         let mic = (p[1] >> 7) & 1;
-                        let link = p[2] & 0x0F;
-                        print!(" | bat={bat}% mic={mic} link={link}");
+                        print!(" | bat={bat}% mic={mic}");
                         println!();
                         last = p;
                     }
@@ -66,7 +86,7 @@ fn main() -> anyhow::Result<()> {
             }
         }
         _ => {
-            println!("  corsair status  — dump raw report data");
+            println!("  corsair status  — dump all reports");
             println!("  corsair watch   — rapid poll, highlight changes");
         }
     }

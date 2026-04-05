@@ -42,9 +42,12 @@ fn main() -> anyhow::Result<()> {
     let mic_item = MenuItem::new(fmt_mic(&state), false, None);
     let link_item = MenuItem::new(fmt_link(&state), false, None);
     let fw_item = MenuItem::new(fmt_fw(&state), false, None);
+    let sleep_countdown_item = MenuItem::new("", false, None);
+
     menu.append(&battery_item).unwrap();
     menu.append(&mic_item).unwrap();
     menu.append(&link_item).unwrap();
+    menu.append(&sleep_countdown_item).unwrap();
     menu.append(&fw_item).unwrap();
     menu.append(&PredefinedMenuItem::separator()).unwrap();
 
@@ -114,11 +117,11 @@ fn main() -> anyhow::Result<()> {
     let mut was_connected = connected;
     let mut notifier = notify::BatteryNotifier::new();
     let mut sidetone_on = true;
-    #[allow(unused_assignments)]
-    let mut current_eq: u8 = 0;
+    let mut active_eq: u8 = 0;
     let mut sleep_timeout_mins: u64 = 0;
     let mut last_active = Instant::now();
 
+    #[allow(unused_assignments)]
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::WaitUntil(Instant::now() + Duration::from_millis(100));
 
@@ -140,9 +143,9 @@ fn main() -> anyhow::Result<()> {
             }
             for (id, idx) in &eq_ids {
                 if ev.id == *id {
-                    current_eq = *idx;
-                    headset.set_eq_preset(*idx);
-                    for (item, i) in &eq_items { item.set_checked(*i == current_eq); }
+                    active_eq = *idx;
+                    headset.set_eq_preset(active_eq);
+                    for (item, i) in &eq_items { item.set_checked(*i == active_eq); }
                 }
             }
             for (id, mins) in &sleep_ids {
@@ -171,6 +174,9 @@ fn main() -> anyhow::Result<()> {
                     battery_item.set_text(fmt_battery(&Some(s.clone())));
                     mic_item.set_text(fmt_mic(&Some(s.clone())));
                     link_item.set_text(fmt_link(&Some(s.clone())));
+                    update_sleep_countdown(
+                        &sleep_countdown_item, sleep_timeout_mins, &last_active,
+                    );
                     notifier.check(s.battery);
                     poll_interval = if c { POLL_ACTIVE } else { POLL_IDLE };
                     if c { last_active = Instant::now(); }
@@ -178,6 +184,7 @@ fn main() -> anyhow::Result<()> {
                     _tray.set_title(Some(""));
                     battery_item.set_text("Battery: --");
                     link_item.set_text("Link: No dongle");
+                    sleep_countdown_item.set_text("");
                     if was_connected {
                         let _ = _tray.set_icon(Some(icon_outline.clone()));
                         was_connected = false;
@@ -213,6 +220,23 @@ fn fmt_link(s: &Option<headset::HeadsetState>) -> String {
     s.as_ref()
         .map(|s| format!("Link: {}", s.link.label()))
         .unwrap_or_else(|| "Link: --".into())
+}
+
+fn update_sleep_countdown(item: &MenuItem, timeout_mins: u64, last_active: &Instant) {
+    if timeout_mins == 0 {
+        item.set_text("");
+        return;
+    }
+    let timeout = Duration::from_secs(timeout_mins * 60);
+    let elapsed = last_active.elapsed();
+    if elapsed >= timeout {
+        item.set_text("Sleep: imminent");
+    } else {
+        let remaining = timeout - elapsed;
+        let mins = remaining.as_secs() / 60;
+        let secs = remaining.as_secs() % 60;
+        item.set_text(format!("Sleep in {mins}:{secs:02}"));
+    }
 }
 
 fn fmt_fw(s: &Option<headset::HeadsetState>) -> String {
