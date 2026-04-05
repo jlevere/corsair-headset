@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build-arm64:
+  build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,22 +27,3 @@ jobs:
         with:
           files: target/release/Corsair-Headset-*.dmg
           generate_release_notes: true
-
-  build-x86_64:
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: brew install hidapi pkg-config
-
-      - name: Build .app and .dmg
-        run: |
-          VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
-          sed -i '' "s/VERSION := .*/VERSION := ${VERSION}/" Makefile
-          make release
-          mv target/release/Corsair-Headset-*.dmg target/release/Corsair-Headset-${VERSION}-x86_64.dmg
-
-      - name: Upload DMG
-        uses: softprops/action-gh-release@v2
-        with:
-          files: target/release/Corsair-Headset-*-x86_64.dmg
