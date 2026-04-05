@@ -2,7 +2,7 @@
 
 A lightweight macOS menu bar app for Corsair wireless headsets. Built in Rust, no iCUE required.
 
-![menu bar](https://img.shields.io/badge/macOS-menu%20bar-black) ![size](https://img.shields.io/badge/binary-2.5MB-green) ![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)
+![menu bar](https://img.shields.io/badge/macOS-menu%20bar-black) ![size](https://img.shields.io/badge/binary-2.5MB-green)
 
 ## Why
 
@@ -65,6 +65,3 @@ corsair-cli        Command-line tool
 corsair-web        WASM browser app (planned)
 ```
 
-## License
-
-MIT OR Apache-2.0
