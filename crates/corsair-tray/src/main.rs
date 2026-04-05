@@ -65,6 +65,29 @@ fn main() -> anyhow::Result<()> {
     }
     menu.append(&eq_sub).unwrap();
 
+    // LED colors
+    let led_sub = Submenu::new("LED Color", true);
+    let led_colors: &[((u8, u8, u8), &str)] = &[
+        ((255, 255, 255), "White"),
+        ((255, 0, 0), "Red"),
+        ((0, 255, 0), "Green"),
+        ((0, 0, 255), "Blue"),
+        ((0, 255, 255), "Cyan"),
+        ((255, 0, 255), "Purple"),
+        ((255, 165, 0), "Orange"),
+        ((255, 255, 0), "Yellow"),
+    ];
+    let mut led_items = Vec::new();
+    for &(rgb, label) in led_colors {
+        let item = MenuItem::new(label, true, None);
+        led_sub.append(&item).unwrap();
+        led_items.push((item, rgb));
+    }
+    led_sub.append(&PredefinedMenuItem::separator()).unwrap();
+    let led_off_item = MenuItem::new("Off", true, None);
+    led_sub.append(&led_off_item).unwrap();
+    menu.append(&led_sub).unwrap();
+
     // Sleep
     let sleep_sub = Submenu::new("Auto Sleep", true);
     let mut sleep_items = Vec::new();
@@ -76,8 +99,8 @@ fn main() -> anyhow::Result<()> {
     menu.append(&sleep_sub).unwrap();
 
     menu.append(&PredefinedMenuItem::separator()).unwrap();
-    let sleep_now_item = MenuItem::new("Sleep Now", true, None);
-    menu.append(&sleep_now_item).unwrap();
+    let power_off_item = MenuItem::new("Power Off", true, None);
+    menu.append(&power_off_item).unwrap();
     menu.append(&PredefinedMenuItem::separator()).unwrap();
     let quit_item = MenuItem::new("Quit", true, None);
     menu.append(&quit_item).unwrap();
@@ -104,9 +127,11 @@ fn main() -> anyhow::Result<()> {
 
     // IDs
     let quit_id = quit_item.id().clone();
-    let sleep_now_id = sleep_now_item.id().clone();
+    let power_off_id = power_off_item.id().clone();
     let sidetone_id = sidetone_item.id().clone();
+    let led_off_id = led_off_item.id().clone();
     let eq_ids: Vec<_> = eq_items.iter().map(|(i, x)| (i.id().clone(), *x)).collect();
+    let led_ids: Vec<_> = led_items.iter().map(|(i, c)| (i.id().clone(), *c)).collect();
     let sleep_ids: Vec<_> = sleep_items.iter().map(|(i, m)| (i.id().clone(), *m)).collect();
     let tray_channel = TrayIconEvent::receiver();
     let menu_channel = MenuEvent::receiver();
@@ -133,8 +158,16 @@ fn main() -> anyhow::Result<()> {
                 *control_flow = ControlFlow::Exit;
                 return;
             }
-            if ev.id == sleep_now_id {
-                headset.trigger_shutdown();
+            if ev.id == power_off_id {
+                headset.shutdown();
+            }
+            if ev.id == led_off_id {
+                headset.set_led_off();
+            }
+            for (id, (r, g, b)) in &led_ids {
+                if ev.id == *id {
+                    headset.set_led_color(*r, *g, *b);
+                }
             }
             if ev.id == sidetone_id {
                 sidetone_on = !sidetone_on;

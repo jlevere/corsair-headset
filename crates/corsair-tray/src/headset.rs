@@ -2,6 +2,7 @@
 
 use std::time::{Duration, Instant};
 
+use corsair_proto::legacy::lighting::{self, LedZone};
 use corsair_proto::legacy::types::{ReportId, ValueId};
 use corsair_proto::Report;
 
@@ -172,6 +173,41 @@ impl Headset {
         self.send_set_value(ValueId::EqIndex, index);
     }
 
+
+    /// Set LED color on both logo zones.
+    pub fn set_led_color(&mut self, r: u8, g: u8, b: u8) {
+        if let Some(device) = &self.device {
+            for zone in [LedZone::LeftLogo, LedZone::RightLogo] {
+                let report = lighting::encode_set_color(zone, r, g, b);
+                if device.write(&report.wire_bytes()).is_err() {
+                    self.handle_disconnect();
+                    return;
+                }
+            }
+        }
+    }
+
+    /// Turn off all LEDs.
+    pub fn set_led_off(&mut self) {
+        if let Some(device) = &self.device {
+            for report in &lighting::encode_clear_pwm() {
+                if device.write(&report.wire_bytes()).is_err() {
+                    self.handle_disconnect();
+                    return;
+                }
+            }
+        }
+    }
+
+    /// Power off the headset immediately.
+    pub fn shutdown(&mut self) {
+        if let Some(device) = &self.device {
+            let report = corsair_proto::legacy::power::encode_shutdown();
+            if device.write(&report.wire_bytes()).is_err() {
+                self.handle_disconnect();
+            }
+        }
+    }
 
     /// Trigger auto-shutdown (beep + power down).
     pub fn trigger_shutdown(&mut self) {

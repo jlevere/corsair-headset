@@ -1,8 +1,12 @@
 use std::time::Duration;
 
+use corsair_proto::legacy::lighting;
+use corsair_proto::legacy::lighting::LedZone;
+use corsair_proto::legacy::power;
+
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = std::env::args().collect();
-    let cmd = args.get(1).map(|s| s.as_str()).unwrap_or("status");
+    let cmd = args.get(1).map(|s| s.as_str()).unwrap_or("help");
 
     let api = hidapi::HidApi::new()?;
     #[cfg(target_os = "macos")]
@@ -15,82 +19,113 @@ fn main() -> anyhow::Result<()> {
 
     let device = api.open_path(iface.path())?;
     device.set_blocking_mode(false)?;
-    let _ = device.write(&[0xC8, 0x01]);
+    let _ = device.write(&[0xC8, 0x01]); // Software mode
     std::thread::sleep(Duration::from_millis(50));
 
     match cmd {
-        "status" => {
-            // Dump everything we can read
-            for &(rid, name) in &[
-                (0x64u8, "State"),
-                (0x65, "Mode"),
-                (0x66, "Firmware"),
-                (0x90, "Report 0x90"),
-                (0xC4, "Report 0xC4"),
-                (0xE2, "Report 0xE2"),
-            ] {
-                let _ = device.write(&[0xC9, rid]);
-                std::thread::sleep(Duration::from_millis(100));
-                if let Some(r) = read(&device, rid) {
-                    let p = &r[1..];
-                    print!("{name} (0x{rid:02X}, {}B): ", p.len());
-                    for b in p.iter().take(30) { print!("{b:02X} "); }
-                    if p.len() > 30 { print!("..."); }
-                    println!();
-                } else {
-                    println!("{name} (0x{rid:02X}): no response");
+        "led" => {
+            let color = args.get(2).map(|s| s.as_str()).unwrap_or("ff0000");
+            let (r, g, b) = parse_hex_color(color);
+            println!("Setting LEDs to #{color} (R={r} G={g} B={b})");
+
+            // Set color on both logo zones
+            for zone in [LedZone::LeftLogo, LedZone::RightLogo] {
+                let report = lighting::encode_set_color(zone, r, g, b);
+                let wire = report.wire_bytes();
+                println!("  {:?}: {} bytes, id=0x{:02X}", zone, wire.len(), wire[0]);
+                match device.write(&wire) {
+                    Ok(n) => println!("    write OK ({n}b)"),
+                    Err(e) => println!("    write err: {e}"),
                 }
-            }
-
-            // Feature report
-            let mut fbuf = [0u8; 65];
-            fbuf[0] = 0xFF;
-            if let Ok(n) = device.get_feature_report(&mut fbuf) {
-                print!("Feature 0xFF ({}B): ", n - 1);
-                for b in fbuf[1..n].iter().take(20) { print!("{b:02X} "); }
-                println!("...");
-            }
-
-            // Also try reading 0xC4 as feature report (it's both input AND output)
-            let mut c4buf = [0u8; 65];
-            c4buf[0] = 0xC4;
-            if let Ok(n) = device.get_feature_report(&mut c4buf) {
-                print!("Feature 0xC4 ({}B): ", n - 1);
-                for b in c4buf[1..n].iter().take(30) { print!("{b:02X} "); }
-                println!("...");
+                std::thread::sleep(Duration::from_millis(50));
             }
         }
-        "watch" => {
-            println!("Rapid polling — move mic boom, press buttons. Ctrl+C to stop.\n");
-            let mut last = Vec::new();
-            loop {
-                let _ = device.write(&[0xC9, 0x64]);
-                if let Some(r) = read(&device, 0x64) {
-                    let p = r[1..].to_vec();
-                    if p != last {
-                        for (i, b) in p.iter().enumerate() {
-                            let changed = last.get(i).is_some_and(|prev| prev != b);
-                            if changed { print!("\x1b[1;31m"); }
-                            print!("{b:02X}");
-                            if changed { print!("\x1b[0m"); }
-                            print!(" ");
-                        }
-                        let bat = p[1] & 0x7F;
-                        let mic = (p[1] >> 7) & 1;
-                        print!(" | bat={bat}% mic={mic}");
-                        println!();
-                        last = p;
-                    }
+        "led-bright" => {
+            let level: u8 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(50);
+            println!("Setting brightness to {level}%");
+            for zone in [LedZone::LeftLogo, LedZone::RightLogo] {
+                let report = lighting::encode_set_brightness(zone, level);
+                match device.write(&report.wire_bytes()) {
+                    Ok(n) => println!("  {:?}: OK ({n}b)", zone),
+                    Err(e) => println!("  {:?}: {e}", zone),
                 }
-                std::thread::sleep(Duration::from_millis(500));
+                std::thread::sleep(Duration::from_millis(50));
+            }
+        }
+        "led-off" => {
+            println!("Clearing all LEDs");
+            let reports = lighting::encode_clear_pwm();
+            for report in &reports {
+                let _ = device.write(&report.wire_bytes());
+                std::thread::sleep(Duration::from_millis(50));
+            }
+            println!("Done.");
+        }
+        "led-engine" => {
+            let action = args.get(2).map(|s| s.as_str()).unwrap_or("start");
+            match action {
+                "start" => {
+                    println!("Starting TI engines");
+                    let r = lighting::encode_start_ti_engines();
+                    let _ = device.write(&r.wire_bytes());
+                }
+                "stop" => {
+                    println!("Stopping TI engines");
+                    let r = lighting::encode_stop_ti_engines();
+                    let _ = device.write(&r.wire_bytes());
+                }
+                _ => println!("Usage: corsair led-engine start|stop"),
+            }
+        }
+        "shutdown" => {
+            println!("Sending auto-shutdown trigger (beep + power down)...");
+            let report = power::encode_auto_shutdown_trigger();
+            match device.send_feature_report(&report.wire_bytes()) {
+                Ok(()) => println!("Sent. Headset should beep and power off."),
+                Err(e) => println!("Error: {e}"),
+            }
+        }
+        "sleep" => {
+            println!("Sending shutdown command...");
+            let report = power::encode_shutdown();
+            match device.write(&report.wire_bytes()) {
+                Ok(n) => println!("Sent ({n}b). Headset should power off."),
+                Err(e) => println!("Error: {e}"),
+            }
+        }
+        "status" => {
+            let _ = device.write(&[0xC9, 0x64]);
+            if let Some(r) = read(&device, 0x64) {
+                let p = &r[1..];
+                let bat = p[1] & 0x7F;
+                let mic = if (p[1] & 0x80) != 0 { "DOWN" } else { "UP" };
+                println!("Battery: {bat}%  Mic: {mic}  Link: {}  State: {}", p[2] & 0x0F, p[3] & 0x07);
             }
         }
         _ => {
-            println!("  corsair status  — dump all reports");
-            println!("  corsair watch   — rapid poll, highlight changes");
+            println!("Commands:");
+            println!("  corsair status");
+            println!("  corsair led <hex>        — set logo color (e.g. ff0000, 00ff00, 0000ff)");
+            println!("  corsair led-bright <0-100> — set LED brightness");
+            println!("  corsair led-off          — turn off all LEDs");
+            println!("  corsair led-engine start|stop");
+            println!("  corsair shutdown         — beep + power off (auto-shutdown trigger)");
+            println!("  corsair sleep            — immediate power off (no beep)");
         }
     }
     Ok(())
+}
+
+fn parse_hex_color(hex: &str) -> (u8, u8, u8) {
+    let hex = hex.trim_start_matches('#');
+    if hex.len() >= 6 {
+        let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0);
+        let g = u8::from_str_radix(&hex[2..4], 16).unwrap_or(0);
+        let b = u8::from_str_radix(&hex[4..6], 16).unwrap_or(0);
+        (r, g, b)
+    } else {
+        (255, 0, 0) // default red
+    }
 }
 
 fn read(device: &hidapi::HidDevice, id: u8) -> Option<Vec<u8>> {
