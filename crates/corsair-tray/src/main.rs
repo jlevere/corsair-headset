@@ -15,7 +15,12 @@ use headset::{Headset, LinkInfo};
 // Constants
 // ---------------------------------------------------------------------------
 
-const POLL_INTERVAL: Duration = Duration::from_secs(30);
+/// Poll interval when headset is active and connected.
+const POLL_INTERVAL_ACTIVE: Duration = Duration::from_secs(30);
+
+/// Poll interval when headset is disconnected, standby, or searching.
+/// Much slower to avoid unnecessary USB traffic.
+const POLL_INTERVAL_IDLE: Duration = Duration::from_secs(120);
 
 const SIDETONE_LEVELS: &[(u8, &str)] = &[
     (0, "Off"),
@@ -143,6 +148,7 @@ fn main() -> anyhow::Result<()> {
     // --- State tracking ---
 
     let mut last_poll = Instant::now();
+    let mut poll_interval = POLL_INTERVAL_ACTIVE;
     let mut notifier = notify::BatteryNotifier::new();
     let mut current_sidetone: u8 = 0;
     let mut current_eq: u8 = 0;
@@ -199,7 +205,7 @@ fn main() -> anyhow::Result<()> {
 
         // Periodic state refresh
         if let Event::NewEvents(_) = event {
-            if last_poll.elapsed() >= POLL_INTERVAL {
+            if last_poll.elapsed() >= poll_interval {
                 last_poll = Instant::now();
 
                 if let Some(s) = headset.poll_state() {
@@ -223,10 +229,17 @@ fn main() -> anyhow::Result<()> {
 
                     // Battery notifications
                     notifier.check(s.battery);
+
+                    // Back off polling when not actively connected
+                    poll_interval = match s.link {
+                        LinkInfo::Active => POLL_INTERVAL_ACTIVE,
+                        _ => POLL_INTERVAL_IDLE,
+                    };
                 } else {
                     _tray.set_title(Some("--"));
                     battery_item.set_text("Battery: --");
                     link_item.set_text("Link: Disconnected");
+                    poll_interval = POLL_INTERVAL_IDLE;
                 }
             }
         }
