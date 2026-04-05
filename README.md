@@ -65,7 +65,7 @@ corsair-cli        Command-line tool
 corsair-web        WASM browser app (planned)
 ```
 
-The protocol was reverse engineered from iCUE 4.33.138 using Rizin. Full findings in [FINDINGS.md](FINDINGS.md).
+The protocol was reverse engineered from iCUE 4.33.138 using Rizin.
 
 ## License
 

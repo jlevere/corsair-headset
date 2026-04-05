@@ -9,8 +9,11 @@ web/test-results
 *.app
 *.dmg
 
-# RE workbench (large binaries and analysis output)
+# RE workbench
 work/
+FINDINGS.md
+notes/
+manifests/
 
 # Editor
 .direnv
