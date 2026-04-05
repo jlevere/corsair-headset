@@ -5,6 +5,7 @@ members = [
     "crates/corsair-transport",
     "crates/corsair-device",
     "crates/corsair-cli",
+    "crates/corsair-tray",
     "crates/corsair-web",
 ]
 
@@ -52,6 +53,11 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Bit manipulation
 bitflags = "2"
+
+# Tray / Menu bar
+tao = "0.35"
+tray-icon = "0.22"
+muda = "0.17"
 
 # WASM
 wasm-bindgen = "0.2"

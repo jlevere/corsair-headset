@@ -1,0 +1,30 @@
+[package]
+name = "corsair-tray"
+description = "macOS menu bar app for Corsair headset control"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "corsair-tray"
+path = "src/main.rs"
+
+[dependencies]
+corsair-proto = { workspace = true }
+hidapi = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tao = { workspace = true }
+tray-icon = { workspace = true }
+muda = { workspace = true }
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "warn", priority = -1 }
+style = { level = "warn", priority = -1 }
+complexity = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
