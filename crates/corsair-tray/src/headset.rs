@@ -1,4 +1,4 @@
-//! Headset HID communication (synchronous, for the tray app).
+//! Headset HID communication with automatic reconnection.
 
 use std::time::{Duration, Instant};
 
@@ -6,12 +6,13 @@ use corsair_proto::legacy::sidetone;
 use corsair_proto::legacy::types::{ReportId, ValueId};
 use corsair_proto::Report;
 
-/// Synchronous headset handle for the tray app.
+/// Headset handle with automatic reconnection on device loss.
 pub struct Headset {
-    device: hidapi::HidDevice,
+    device: Option<hidapi::HidDevice>,
+    last_reconnect_attempt: Instant,
 }
 
-/// Snapshot of the headset's current state.
+/// Snapshot of headset state.
 #[derive(Debug, Clone)]
 pub struct HeadsetState {
     pub battery: u8,
@@ -84,33 +85,52 @@ impl LinkInfo {
     }
 }
 
+/// Minimum time between reconnection attempts.
+const RECONNECT_COOLDOWN: Duration = Duration::from_secs(5);
+
 impl Headset {
-    /// Open the first Corsair headset found on the 0xFFC5 usage page.
-    pub fn open() -> anyhow::Result<Self> {
-        let api = hidapi::HidApi::new()?;
-        #[cfg(target_os = "macos")]
-        api.set_open_exclusive(true);
-
-        let iface = api
-            .device_list()
-            .find(|d| d.vendor_id() == 0x1B1C && d.usage_page() == 0xFFC5)
-            .ok_or_else(|| anyhow::anyhow!("No Corsair headset found"))?;
-
-        let path = iface.path().to_owned();
-        let device = api.open_path(&path)?;
-        device.set_blocking_mode(false)?;
-        Ok(Self { device })
+    /// Try to open the headset. Returns a handle even if the device isn't
+    /// found — it will reconnect automatically on the next operation.
+    pub fn new() -> Self {
+        let device = Self::try_open();
+        if device.is_some() {
+            tracing::info!("Headset connected");
+        } else {
+            tracing::warn!("Headset not found, will retry on next poll");
+        }
+        Self {
+            device,
+            last_reconnect_attempt: Instant::now(),
+        }
     }
 
-    /// Poll the headset for its current state.
-    pub fn poll_state(&self) -> Option<HeadsetState> {
-        // Request state
-        self.send_request_data(ReportId::State);
-        let state_data = self.read_report(ReportId::State as u8)?;
+    /// Whether the HID device is currently open.
+    pub fn is_connected(&self) -> bool {
+        self.device.is_some()
+    }
 
-        // Request firmware
-        self.send_request_data(ReportId::FirmwareVersion);
-        let fw_data = self.read_report(ReportId::FirmwareVersion as u8);
+    /// Poll the headset for its current state. Returns `None` if the device
+    /// is disconnected (will attempt reconnection automatically).
+    pub fn poll_state(&mut self) -> Option<HeadsetState> {
+        self.ensure_connected();
+        let device = self.device.as_ref()?;
+
+        // Request state
+        if device.write(&[ReportId::RequestData as u8, ReportId::State as u8]).is_err() {
+            self.handle_disconnect();
+            return None;
+        }
+        let state_data = match Self::read_report_from(device, ReportId::State as u8) {
+            Some(d) => d,
+            None => {
+                self.handle_disconnect();
+                return None;
+            }
+        };
+
+        // Request firmware (non-fatal if it fails)
+        let _ = device.write(&[ReportId::RequestData as u8, ReportId::FirmwareVersion as u8]);
+        let fw_data = Self::read_report_from(device, ReportId::FirmwareVersion as u8);
 
         let p = &state_data[1..];
         if p.len() < 4 {
@@ -138,52 +158,96 @@ impl Headset {
     }
 
     /// Set sidetone level (0–100%).
-    pub fn set_sidetone(&self, percent: u8) {
-        let report = sidetone::encode_set_sidetone_level(percent);
-        let _ = self.device.send_feature_report(&report.wire_bytes());
+    pub fn set_sidetone(&mut self, percent: u8) {
+        if let Some(device) = &self.device {
+            let report = sidetone::encode_set_sidetone_level(percent);
+            if device.send_feature_report(&report.wire_bytes()).is_err() {
+                self.handle_disconnect();
+            }
+        }
     }
 
     /// Set EQ preset index (0–4).
-    pub fn set_eq_preset(&self, index: u8) {
-        let report = Report::with_payload(
-            ReportId::SetValue as u8,
-            &[ValueId::EqIndex as u8, index],
-        );
-        if let Some(r) = report {
-            let _ = self.device.write(&r.wire_bytes());
+    pub fn set_eq_preset(&mut self, index: u8) {
+        if let Some(device) = &self.device {
+            if let Some(r) = Report::with_payload(
+                ReportId::SetValue as u8,
+                &[ValueId::EqIndex as u8, index],
+            ) {
+                if device.write(&r.wire_bytes()).is_err() {
+                    self.handle_disconnect();
+                }
+            }
+        }
+    }
+
+    /// Toggle mic mute via SetValue.
+    pub fn set_mic_mute(&mut self, muted: bool) {
+        if let Some(device) = &self.device {
+            if let Some(r) = Report::with_payload(
+                ReportId::SetValue as u8,
+                &[ValueId::MicState as u8, u8::from(muted)],
+            ) {
+                if device.write(&r.wire_bytes()).is_err() {
+                    self.handle_disconnect();
+                }
+            }
         }
     }
 
     /// Trigger auto-shutdown (beep + power down).
-    ///
-    /// The VOID Elite uses host-controlled auto-shutoff: the HOST tracks
-    /// inactivity and sends this trigger when idle. The headset beeps
-    /// and powers down.
-    pub fn trigger_shutdown(&self) {
-        let report = corsair_proto::legacy::power::encode_auto_shutdown_trigger();
-        let _ = self.device.send_feature_report(&report.wire_bytes());
-    }
-
-    /// Toggle mic mute via SetValue.
-    pub fn set_mic_mute(&self, muted: bool) {
-        let report = Report::with_payload(
-            ReportId::SetValue as u8,
-            &[ValueId::MicState as u8, u8::from(muted)],
-        );
-        if let Some(r) = report {
-            let _ = self.device.write(&r.wire_bytes());
+    pub fn trigger_shutdown(&mut self) {
+        if let Some(device) = &self.device {
+            let report = corsair_proto::legacy::power::encode_auto_shutdown_trigger();
+            if device.send_feature_report(&report.wire_bytes()).is_err() {
+                self.handle_disconnect();
+            }
         }
     }
 
-    fn send_request_data(&self, id: ReportId) {
-        let _ = self.device.write(&[ReportId::RequestData as u8, id as u8]);
+    // --- Internal ---
+
+    fn try_open() -> Option<hidapi::HidDevice> {
+        let api = hidapi::HidApi::new().ok()?;
+        #[cfg(target_os = "macos")]
+        api.set_open_exclusive(true);
+
+        let iface = api
+            .device_list()
+            .find(|d| d.vendor_id() == 0x1B1C && d.usage_page() == 0xFFC5)?;
+
+        let path = iface.path().to_owned();
+        let device = api.open_path(&path).ok()?;
+        device.set_blocking_mode(false).ok()?;
+        Some(device)
     }
 
-    fn read_report(&self, expected_id: u8) -> Option<Vec<u8>> {
+    fn ensure_connected(&mut self) {
+        if self.device.is_some() {
+            return;
+        }
+        if self.last_reconnect_attempt.elapsed() < RECONNECT_COOLDOWN {
+            return;
+        }
+        self.last_reconnect_attempt = Instant::now();
+        self.device = Self::try_open();
+        if self.device.is_some() {
+            tracing::info!("Headset reconnected");
+        }
+    }
+
+    fn handle_disconnect(&mut self) {
+        if self.device.is_some() {
+            tracing::warn!("Headset disconnected");
+            self.device = None;
+        }
+    }
+
+    fn read_report_from(device: &hidapi::HidDevice, expected_id: u8) -> Option<Vec<u8>> {
         let start = Instant::now();
         let mut buf = [0u8; 65];
         while start.elapsed() < Duration::from_millis(500) {
-            match self.device.read_timeout(&mut buf, 100) {
+            match device.read_timeout(&mut buf, 100) {
                 Ok(n) if n >= 1 && buf[0] == expected_id => {
                     return Some(buf[..n].to_vec());
                 }
