@@ -125,6 +125,11 @@ fn main() -> anyhow::Result<()> {
         .with_tooltip("Corsair Headset")
         .build()?;
 
+    // Hide tray if no dongle on startup
+    if !headset.is_connected() {
+        let _ = _tray.set_visible(false);
+    }
+
     // IDs
     let quit_id = quit_item.id().clone();
     let power_off_id = power_off_item.id().clone();
@@ -141,6 +146,7 @@ fn main() -> anyhow::Result<()> {
     let mut poll_interval = POLL_ACTIVE;
     let mut was_connected = connected;
     let mut notifier = notify::BatteryNotifier::new();
+    let mut tray_visible = headset.is_connected();
     let mut sidetone_on = true;
     let mut active_eq: u8 = 0;
     let mut sleep_timeout_mins: u64 = 0;
@@ -195,6 +201,12 @@ fn main() -> anyhow::Result<()> {
                 last_poll = Instant::now();
 
                 if let Some(s) = headset.poll_state() {
+                    // Dongle is connected — show tray if hidden
+                    if !tray_visible {
+                        let _ = _tray.set_visible(true);
+                        tray_visible = true;
+                    }
+
                     let c = s.link == LinkInfo::Active;
                     if c != was_connected {
                         let _ = _tray.set_icon(Some(
@@ -214,12 +226,10 @@ fn main() -> anyhow::Result<()> {
                     poll_interval = if c { POLL_ACTIVE } else { POLL_IDLE };
                     if c { last_active = Instant::now(); }
                 } else {
-                    _tray.set_title(Some(""));
-                    battery_item.set_text("Battery: --");
-                    link_item.set_text("Link: No dongle");
-                    sleep_countdown_item.set_text("");
-                    if was_connected {
-                        let _ = _tray.set_icon(Some(icon_outline.clone()));
+                    // No dongle — hide the tray icon entirely
+                    if tray_visible {
+                        let _ = _tray.set_visible(false);
+                        tray_visible = false;
                         was_connected = false;
                     }
                     poll_interval = POLL_IDLE;
