@@ -38,6 +38,15 @@ const EQ_PRESETS: &[(u8, &str)] = &[
     (4, "Movie Theater"),
 ];
 
+/// Auto-sleep timeout options (minutes). 0 = disabled.
+const SLEEP_TIMEOUTS: &[(u16, &str)] = &[
+    (0, "Never"),
+    (5, "5 minutes"),
+    (15, "15 minutes"),
+    (30, "30 minutes"),
+    (60, "1 hour"),
+];
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -107,21 +116,47 @@ fn main() -> anyhow::Result<()> {
 
     menu.append(&PredefinedMenuItem::separator()).unwrap();
 
+    // Auto-sleep submenu
+    let sleep_sub = Submenu::new("Auto Sleep", true);
+    let mut sleep_items = Vec::new();
+    for &(mins, label) in SLEEP_TIMEOUTS {
+        let item = CheckMenuItem::new(label, true, mins == 15, None);
+        sleep_sub.append(&item).unwrap();
+        sleep_items.push((item, mins));
+    }
+    menu.append(&sleep_sub).unwrap();
+
+    menu.append(&PredefinedMenuItem::separator()).unwrap();
+
     let quit_item = MenuItem::new("Quit", true, None);
     menu.append(&quit_item).unwrap();
 
-    // --- Build tray ---
+    // --- Build tray with dual icons ---
 
     let event_loop = EventLoopBuilder::new().build();
-    let tray_icon = icon::headphone_icon()?;
+    let icon_connected = icon::solid_icon()?;
+    let icon_disconnected = icon::outline_icon()?;
+
+    let is_connected = state
+        .as_ref()
+        .is_some_and(|s| s.link == LinkInfo::Active);
+
+    let initial_icon = if is_connected {
+        &icon_connected
+    } else {
+        &icon_disconnected
+    };
 
     let initial_title = state
         .as_ref()
-        .map(|s| format!("{}%", s.battery))
+        .map(|s| match s.link {
+            LinkInfo::Active => format!("{}%", s.battery),
+            _ => s.link.label().into(),
+        })
         .unwrap_or_else(|| "--".into());
 
     let _tray = TrayIconBuilder::new()
-        .with_icon(tray_icon)
+        .with_icon(initial_icon.clone())
         .with_icon_as_template(true)
         .with_menu(Box::new(menu))
         .with_title(&initial_title)
@@ -143,15 +178,22 @@ fn main() -> anyhow::Result<()> {
         .map(|(item, idx)| (item.id().clone(), *idx))
         .collect();
 
+    let sleep_ids: Vec<_> = sleep_items
+        .iter()
+        .map(|(item, mins)| (item.id().clone(), *mins))
+        .collect();
+
     let menu_channel = MenuEvent::receiver();
 
     // --- State tracking ---
 
     let mut last_poll = Instant::now();
     let mut poll_interval = POLL_INTERVAL_ACTIVE;
+    let mut was_connected = is_connected;
     let mut notifier = notify::BatteryNotifier::new();
     let mut current_sidetone: u8 = 0;
     let mut current_eq: u8 = 0;
+    let mut current_sleep: u16 = 15;
     let mut mic_muted = false;
 
     // --- Event loop ---
@@ -194,11 +236,22 @@ fn main() -> anyhow::Result<()> {
                 if event.id == *id {
                     current_eq = *idx;
                     headset.set_eq_preset(*idx);
-                    // Update checkmarks
                     for (item, i) in &eq_items {
                         item.set_checked(*i == current_eq);
                     }
                     tracing::info!("EQ preset: {}", EQ_PRESETS[*idx as usize].1);
+                }
+            }
+
+            // Auto-sleep timeout selection
+            for (id, mins) in &sleep_ids {
+                if event.id == *id {
+                    current_sleep = *mins;
+                    headset.set_auto_shutdown(*mins);
+                    for (item, m) in &sleep_items {
+                        item.set_checked(*m == current_sleep);
+                    }
+                    tracing::info!("Auto sleep: {mins} minutes");
                 }
             }
         }
@@ -209,6 +262,19 @@ fn main() -> anyhow::Result<()> {
                 last_poll = Instant::now();
 
                 if let Some(s) = headset.poll_state() {
+                    let connected = s.link == LinkInfo::Active;
+
+                    // Swap icon when connection state changes
+                    if connected != was_connected {
+                        let new_icon = if connected {
+                            &icon_connected
+                        } else {
+                            &icon_disconnected
+                        };
+                        let _ = _tray.set_icon(Some(new_icon.clone()));
+                        was_connected = connected;
+                    }
+
                     // Update menu bar title
                     let title = match s.link {
                         LinkInfo::Active => format!("{}%", s.battery),

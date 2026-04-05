@@ -154,6 +154,12 @@ impl Headset {
         }
     }
 
+    /// Set auto-shutdown timeout (0 = disabled, else minutes).
+    pub fn set_auto_shutdown(&self, minutes: u16) {
+        let report = corsair_proto::legacy::power::encode_set_auto_shutdown(minutes);
+        let _ = self.device.send_feature_report(&report.wire_bytes());
+    }
+
     /// Toggle mic mute via SetValue.
     pub fn set_mic_mute(&self, muted: bool) {
         let report = Report::with_payload(
