@@ -1,13 +1,13 @@
 use std::time::{Duration, Instant};
 
-use muda::{
-    Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu,
-};
+use muda::{Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu};
 use tao::event::Event;
 use tao::event_loop::{ControlFlow, EventLoopBuilder};
 use tray_icon::TrayIconBuilder;
 
 use corsair_proto::legacy::sidetone;
+
+mod icon;
 
 // ---------------------------------------------------------------------------
 // HID helpers (direct hidapi, no async needed for the tray app)
@@ -130,14 +130,9 @@ const SIDETONE_LEVELS: &[(u8, &str)] = &[
     (100, "Max (100%)"),
 ];
 
-fn battery_icon(percent: u8) -> &'static str {
-    match percent {
-        0..=10 => "🪫",
-        11..=30 => "🔋",
-        31..=60 => "🔋",
-        61..=100 => "🔋",
-        _ => "🔋",
-    }
+/// Format battery percentage as clean menu bar text (no emoji).
+fn battery_title(percent: u8) -> String {
+    format!("{percent}%")
 }
 
 // ---------------------------------------------------------------------------
@@ -162,9 +157,9 @@ fn main() -> anyhow::Result<()> {
     // Initial state
     let state = headset.poll_state();
     let initial_title = if let Some(ref s) = state {
-        format!("{} {}%", battery_icon(s.battery), s.battery)
+        battery_title(s.battery)
     } else {
-        "🎧 --".to_string()
+        "--".to_string()
     };
 
     // Build menu
@@ -230,10 +225,13 @@ fn main() -> anyhow::Result<()> {
     menu.append(&PredefinedMenuItem::separator()).unwrap();
     menu.append(&quit_item).unwrap();
 
-    // Build tray icon (text-only on macOS, no image needed)
+    // Build tray icon with template image (auto-tints for light/dark mode)
     let event_loop = EventLoopBuilder::new().build();
+    let tray_icon = icon::headphone_icon()?;
 
     let _tray = TrayIconBuilder::new()
+        .with_icon(tray_icon)
+        .with_icon_as_template(true) // macOS: auto-tint for system theme
         .with_menu(Box::new(menu))
         .with_title(&initial_title)
         .with_tooltip("Corsair Headset")
@@ -274,7 +272,7 @@ fn main() -> anyhow::Result<()> {
             if last_poll.elapsed() >= poll_interval {
                 last_poll = Instant::now();
                 if let Some(s) = headset.poll_state() {
-                    let title = format!("{} {}%", battery_icon(s.battery), s.battery);
+                    let title = battery_title(s.battery);
                     _tray.set_title(Some(&title));
 
                     battery_item.set_text(&format!(
