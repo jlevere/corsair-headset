@@ -8,6 +8,7 @@ use tray_icon::{TrayIconBuilder, TrayIconEvent};
 mod headset;
 mod icon;
 mod notify;
+mod settings;
 
 use headset::{Headset, LinkInfo};
 
@@ -32,8 +33,14 @@ const SLEEP_TIMEOUTS: &[(u64, &str)] = &[
 fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
+    let mut settings = settings::Settings::load();
     let mut headset = Headset::new();
     let state = headset.poll_state();
+
+    // Apply saved settings to headset on startup
+    if headset.is_connected() {
+        apply_settings(&mut headset, &settings);
+    }
 
     let menu = Menu::new();
 
@@ -52,14 +59,14 @@ fn main() -> anyhow::Result<()> {
     menu.append(&PredefinedMenuItem::separator()).unwrap();
 
     // Sidetone toggle
-    let sidetone_item = CheckMenuItem::new("Sidetone", true, true, None);
+    let sidetone_item = CheckMenuItem::new("Sidetone", true, settings.sidetone_on, None);
     menu.append(&sidetone_item).unwrap();
 
     // EQ
     let eq_sub = Submenu::new("EQ Preset", true);
     let mut eq_items = Vec::new();
     for &(idx, label) in EQ_PRESETS {
-        let item = CheckMenuItem::new(label, true, idx == 0, None);
+        let item = CheckMenuItem::new(label, true, idx == settings.eq_preset, None);
         eq_sub.append(&item).unwrap();
         eq_items.push((item, idx));
     }
@@ -92,7 +99,7 @@ fn main() -> anyhow::Result<()> {
     let sleep_sub = Submenu::new("Auto Sleep", true);
     let mut sleep_items = Vec::new();
     for &(mins, label) in SLEEP_TIMEOUTS {
-        let item = CheckMenuItem::new(label, true, mins == 0, None);
+        let item = CheckMenuItem::new(label, true, mins == settings.sleep_timeout_mins, None);
         sleep_sub.append(&item).unwrap();
         sleep_items.push((item, mins));
     }
@@ -147,9 +154,9 @@ fn main() -> anyhow::Result<()> {
     let mut was_connected = connected;
     let mut notifier = notify::BatteryNotifier::new();
     let mut tray_visible = headset.is_connected();
-    let mut sidetone_on = true;
-    let mut active_eq: u8 = 0;
-    let mut sleep_timeout_mins: u64 = 0;
+    let mut sidetone_on = settings.sidetone_on;
+    let mut active_eq: u8 = settings.eq_preset;
+    let mut sleep_timeout_mins: u64 = settings.sleep_timeout_mins;
     let mut last_active = Instant::now();
 
     #[allow(unused_assignments)]
@@ -169,22 +176,30 @@ fn main() -> anyhow::Result<()> {
             }
             if ev.id == led_off_id {
                 headset.set_led_off();
+                settings.led_color = None;
+                settings.save();
             }
             for (id, (r, g, b)) in &led_ids {
                 if ev.id == *id {
                     headset.set_led_color(*r, *g, *b);
+                    settings.led_color = Some([*r, *g, *b]);
+                    settings.save();
                 }
             }
             if ev.id == sidetone_id {
                 sidetone_on = !sidetone_on;
                 sidetone_item.set_checked(sidetone_on);
                 headset.set_sidetone(sidetone_on);
+                settings.sidetone_on = sidetone_on;
+                settings.save();
             }
             for (id, idx) in &eq_ids {
                 if ev.id == *id {
                     active_eq = *idx;
                     headset.set_eq_preset(active_eq);
                     for (item, i) in &eq_items { item.set_checked(*i == active_eq); }
+                    settings.eq_preset = active_eq;
+                    settings.save();
                 }
             }
             for (id, mins) in &sleep_ids {
@@ -192,6 +207,8 @@ fn main() -> anyhow::Result<()> {
                     sleep_timeout_mins = *mins;
                     last_active = Instant::now();
                     for (item, m) in &sleep_items { item.set_checked(*m == sleep_timeout_mins); }
+                    settings.sleep_timeout_mins = sleep_timeout_mins;
+                    settings.save();
                 }
             }
         }
@@ -205,6 +222,8 @@ fn main() -> anyhow::Result<()> {
                     if !tray_visible {
                         let _ = _tray.set_visible(true);
                         tray_visible = true;
+                        // Re-apply saved settings on reconnect
+                        apply_settings(&mut headset, &settings);
                     }
 
                     let c = s.link == LinkInfo::Active;
@@ -263,6 +282,14 @@ fn fmt_link(s: &Option<headset::HeadsetState>) -> String {
     s.as_ref()
         .map(|s| format!("Link: {}", s.link.label()))
         .unwrap_or_else(|| "Link: --".into())
+}
+
+fn apply_settings(headset: &mut Headset, settings: &settings::Settings) {
+    headset.set_sidetone(settings.sidetone_on);
+    headset.set_eq_preset(settings.eq_preset);
+    if let Some([r, g, b]) = settings.led_color {
+        headset.set_led_color(r, g, b);
+    }
 }
 
 fn update_sleep_countdown(item: &MenuItem, timeout_mins: u64, last_active: &Instant) {
