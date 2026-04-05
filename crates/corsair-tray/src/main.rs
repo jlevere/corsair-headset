@@ -11,11 +11,8 @@ mod notify;
 
 use headset::{Headset, LinkInfo};
 
-const POLL_ACTIVE: Duration = Duration::from_secs(30);
+const POLL_ACTIVE: Duration = Duration::from_secs(15);
 const POLL_IDLE: Duration = Duration::from_secs(120);
-
-// Sidetone is on/off only on VOID Elite (volume is fixed in hardware).
-// Volume control would require CorsairAudioConfigService.
 
 const EQ_PRESETS: &[(u8, &str)] = &[
     (0, "Pure Direct"),
@@ -33,30 +30,29 @@ const SLEEP_TIMEOUTS: &[(u64, &str)] = &[
 ];
 
 fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     let mut headset = Headset::new();
     let state = headset.poll_state();
 
-    // --- Menu ---
     let menu = Menu::new();
 
+    // Status
     let battery_item = MenuItem::new(fmt_battery(&state), false, None);
     let mic_item = MenuItem::new(fmt_mic(&state), false, None);
     let link_item = MenuItem::new(fmt_link(&state), false, None);
-    let fw_item = MenuItem::new(fmt_firmware(&state), false, None);
-
+    let fw_item = MenuItem::new(fmt_fw(&state), false, None);
     menu.append(&battery_item).unwrap();
     menu.append(&mic_item).unwrap();
     menu.append(&link_item).unwrap();
     menu.append(&fw_item).unwrap();
     menu.append(&PredefinedMenuItem::separator()).unwrap();
 
+    // Sidetone toggle
     let sidetone_item = CheckMenuItem::new("Sidetone", true, true, None);
     menu.append(&sidetone_item).unwrap();
 
+    // EQ
     let eq_sub = Submenu::new("EQ Preset", true);
     let mut eq_items = Vec::new();
     for &(idx, label) in EQ_PRESETS {
@@ -66,16 +62,7 @@ fn main() -> anyhow::Result<()> {
     }
     menu.append(&eq_sub).unwrap();
 
-    menu.append(&PredefinedMenuItem::separator()).unwrap();
-
-    let mic_mute_item = CheckMenuItem::new(
-        "Mic Mute",
-        true,
-        state.as_ref().is_some_and(|s| s.mic_boom_up),
-        None,
-    );
-    menu.append(&mic_mute_item).unwrap();
-
+    // Sleep
     let sleep_sub = Submenu::new("Auto Sleep", true);
     let mut sleep_items = Vec::new();
     for &(mins, label) in SLEEP_TIMEOUTS {
@@ -86,75 +73,58 @@ fn main() -> anyhow::Result<()> {
     menu.append(&sleep_sub).unwrap();
 
     menu.append(&PredefinedMenuItem::separator()).unwrap();
-
     let sleep_now_item = MenuItem::new("Sleep Now", true, None);
     menu.append(&sleep_now_item).unwrap();
-
     menu.append(&PredefinedMenuItem::separator()).unwrap();
-
     let quit_item = MenuItem::new("Quit", true, None);
     menu.append(&quit_item).unwrap();
 
-    // --- Tray ---
+    // Tray
     let event_loop = EventLoopBuilder::new().build();
     let icon_solid = icon::solid_icon()?;
     let icon_outline = icon::outline_icon()?;
-
     let connected = state.as_ref().is_some_and(|s| s.link == LinkInfo::Active);
-    // When dongle isn't plugged in, show empty title (just the icon).
-    // When connected, show battery %. When standby/searching, show status.
-    let title = match &state {
+
+    let initial_title = match &state {
         Some(s) if s.link == LinkInfo::Active => format!("{}%", s.battery),
         Some(s) => s.link.label().into(),
-        None => String::new(), // no dongle — just show the outline icon
+        None => String::new(),
     };
 
     let _tray = TrayIconBuilder::new()
         .with_icon(if connected { icon_solid.clone() } else { icon_outline.clone() })
         .with_icon_as_template(true)
         .with_menu(Box::new(menu))
-        .with_title(&title)
+        .with_title(&initial_title)
         .with_tooltip("Corsair Headset")
         .build()?;
 
-    // --- IDs ---
+    // IDs
     let quit_id = quit_item.id().clone();
-    let mic_mute_id = mic_mute_item.id().clone();
     let sleep_now_id = sleep_now_item.id().clone();
     let sidetone_id = sidetone_item.id().clone();
     let eq_ids: Vec<_> = eq_items.iter().map(|(i, x)| (i.id().clone(), *x)).collect();
     let sleep_ids: Vec<_> = sleep_items.iter().map(|(i, m)| (i.id().clone(), *m)).collect();
-
-    let menu_channel = MenuEvent::receiver();
     let tray_channel = TrayIconEvent::receiver();
+    let menu_channel = MenuEvent::receiver();
 
-    // --- State ---
+    // State
     let mut last_poll = Instant::now();
     let mut poll_interval = POLL_ACTIVE;
     let mut was_connected = connected;
     let mut notifier = notify::BatteryNotifier::new();
     let mut sidetone_on = true;
+    #[allow(unused_assignments)]
     let mut current_eq: u8 = 0;
     let mut sleep_timeout_mins: u64 = 0;
     let mut last_active = Instant::now();
-    let mut mic_muted = false;
 
-    // --- Event loop ---
-    #[allow(unused_assignments)]
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::WaitUntil(Instant::now() + Duration::from_millis(100));
 
-        // Poll on tray click — fresh data when menu opens
-        if let Ok(TrayIconEvent::Click { .. }) = tray_channel.try_recv() {
-            do_refresh(
-                &mut headset, &_tray, &battery_item, &mic_item, &link_item,
-                &icon_solid, &icon_outline, &mut was_connected,
-                &mut notifier, &mut mic_muted, &mic_mute_item, &mut poll_interval,
-            );
-            last_poll = Instant::now();
-        }
+        // Drain tray events (don't refresh on click — avoids menu flicker)
+        while tray_channel.try_recv().is_ok() {}
 
-        // Menu events
         if let Ok(ev) = menu_channel.try_recv() {
             if ev.id == quit_id {
                 *control_flow = ControlFlow::Exit;
@@ -162,11 +132,6 @@ fn main() -> anyhow::Result<()> {
             }
             if ev.id == sleep_now_id {
                 headset.trigger_shutdown();
-            }
-            if ev.id == mic_mute_id {
-                mic_muted = !mic_muted;
-                mic_mute_item.set_checked(mic_muted);
-                headset.set_mic_mute(mic_muted);
             }
             if ev.id == sidetone_id {
                 sidetone_on = !sidetone_on;
@@ -189,84 +154,47 @@ fn main() -> anyhow::Result<()> {
             }
         }
 
-        // Periodic refresh
         if let Event::NewEvents(_) = event {
             if last_poll.elapsed() >= poll_interval {
                 last_poll = Instant::now();
-                do_refresh(
-                    &mut headset, &_tray, &battery_item, &mic_item, &link_item,
-                    &icon_solid, &icon_outline, &mut was_connected,
-                    &mut notifier, &mut mic_muted, &mic_mute_item, &mut poll_interval,
-                );
-                if was_connected {
-                    last_active = Instant::now();
+
+                if let Some(s) = headset.poll_state() {
+                    let c = s.link == LinkInfo::Active;
+                    if c != was_connected {
+                        let _ = _tray.set_icon(Some(
+                            if c { icon_solid.clone() } else { icon_outline.clone() }
+                        ));
+                        was_connected = c;
+                    }
+                    let title = if c { format!("{}%", s.battery) } else { s.link.label().into() };
+                    _tray.set_title(Some(&title));
+                    battery_item.set_text(fmt_battery(&Some(s.clone())));
+                    mic_item.set_text(fmt_mic(&Some(s.clone())));
+                    link_item.set_text(fmt_link(&Some(s.clone())));
+                    notifier.check(s.battery);
+                    poll_interval = if c { POLL_ACTIVE } else { POLL_IDLE };
+                    if c { last_active = Instant::now(); }
+                } else {
+                    _tray.set_title(Some(""));
+                    battery_item.set_text("Battery: --");
+                    link_item.set_text("Link: No dongle");
+                    if was_connected {
+                        let _ = _tray.set_icon(Some(icon_outline.clone()));
+                        was_connected = false;
+                    }
+                    poll_interval = POLL_IDLE;
                 }
             }
 
-            // Host-controlled auto-sleep
             if sleep_timeout_mins > 0
                 && was_connected
                 && last_active.elapsed() >= Duration::from_secs(sleep_timeout_mins * 60)
             {
-                tracing::info!("Inactivity timeout — triggering shutdown");
                 headset.trigger_shutdown();
                 last_active = Instant::now();
             }
         }
     });
-}
-
-#[allow(clippy::too_many_arguments)]
-fn do_refresh(
-    headset: &mut Headset,
-    tray: &tray_icon::TrayIcon,
-    battery_item: &MenuItem,
-    mic_item: &MenuItem,
-    link_item: &MenuItem,
-    icon_solid: &tray_icon::Icon,
-    icon_outline: &tray_icon::Icon,
-    was_connected: &mut bool,
-    notifier: &mut notify::BatteryNotifier,
-    mic_muted: &mut bool,
-    mic_mute_item: &CheckMenuItem,
-    poll_interval: &mut Duration,
-) {
-    if let Some(s) = headset.poll_state() {
-        let connected = s.link == LinkInfo::Active;
-
-        if connected != *was_connected {
-            let icon = if connected { icon_solid } else { icon_outline };
-            let _ = tray.set_icon(Some(icon.clone()));
-            *was_connected = connected;
-        }
-
-        let title = match s.link {
-            LinkInfo::Active => format!("{}%", s.battery),
-            _ => s.link.label().to_string(),
-        };
-        tray.set_title(Some(&title));
-
-        battery_item.set_text(fmt_battery(&Some(s.clone())));
-        mic_item.set_text(fmt_mic(&Some(s.clone())));
-        link_item.set_text(fmt_link(&Some(s.clone())));
-
-        if s.mic_boom_up != *mic_muted {
-            *mic_muted = s.mic_boom_up;
-            mic_mute_item.set_checked(*mic_muted);
-        }
-
-        notifier.check(s.battery);
-        *poll_interval = if connected { POLL_ACTIVE } else { POLL_IDLE };
-    } else {
-        tray.set_title(Some(""));
-        battery_item.set_text("Battery: --");
-        link_item.set_text("Link: No dongle");
-        if *was_connected {
-            let _ = tray.set_icon(Some(icon_outline.clone()));
-            *was_connected = false;
-        }
-        *poll_interval = POLL_IDLE;
-    }
 }
 
 fn fmt_battery(s: &Option<headset::HeadsetState>) -> String {
@@ -277,7 +205,7 @@ fn fmt_battery(s: &Option<headset::HeadsetState>) -> String {
 
 fn fmt_mic(s: &Option<headset::HeadsetState>) -> String {
     s.as_ref()
-        .map(|s| if s.mic_boom_up { "Mic: Muted (boom up)" } else { "Mic: Live (boom down)" }.into())
+        .map(|s| if s.mic_boom_up { "Mic: Off (boom up)" } else { "Mic: On" }.into())
         .unwrap_or_else(|| "Mic: --".into())
 }
 
@@ -287,8 +215,8 @@ fn fmt_link(s: &Option<headset::HeadsetState>) -> String {
         .unwrap_or_else(|| "Link: --".into())
 }
 
-fn fmt_firmware(s: &Option<headset::HeadsetState>) -> String {
+fn fmt_fw(s: &Option<headset::HeadsetState>) -> String {
     s.as_ref()
-        .map(|s| format!("Firmware: TX {} / RX {}", s.fw_tx, s.fw_rx))
-        .unwrap_or_else(|| "Firmware: --".into())
+        .map(|s| format!("FW {}/{}", s.fw_tx, s.fw_rx))
+        .unwrap_or_else(|| "FW --".into())
 }

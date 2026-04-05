@@ -2,7 +2,7 @@ use std::time::Duration;
 
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = std::env::args().collect();
-    let cmd = args.get(1).map(|s| s.as_str()).unwrap_or("help");
+    let cmd = args.get(1).map(|s| s.as_str()).unwrap_or("status");
 
     let api = hidapi::HidApi::new()?;
     #[cfg(target_os = "macos")]
@@ -15,8 +15,6 @@ fn main() -> anyhow::Result<()> {
 
     let device = api.open_path(iface.path())?;
     device.set_blocking_mode(false)?;
-
-    // Always switch to software mode
     let _ = device.write(&[0xC8, 0x01]);
     std::thread::sleep(Duration::from_millis(50));
 
@@ -24,90 +22,52 @@ fn main() -> anyhow::Result<()> {
         "status" => {
             device.write(&[0xC9, 0x64])?;
             if let Some(r) = read(&device, 0x64) {
-                let bat = r[2] & 0x7F;
-                let mic = if (r[2] & 0x80) == 0 { "UP" } else { "DOWN" };
-                println!("Battery: {bat}%  Mic: {mic}  Link: {}", r[3] & 0x0F);
+                let p = &r[1..];
+                println!("State (0x64) raw: {:02X?}", p);
+                if p.len() >= 4 {
+                    let bat = p[1] & 0x7F;
+                    let mic_bit = (p[1] >> 7) & 1;
+                    let link_lo = p[2] & 0x0F;
+                    let link_hi = (p[2] >> 4) & 0x0F;
+                    let bat_st = p[3] & 0x07;
+                    println!("  battery={bat}%  mic_bit={mic_bit}  link_lo={link_lo}  link_hi=0x{link_hi:X}  bat_state={bat_st}");
+                }
+            }
+            device.write(&[0xC9, 0x66])?;
+            if let Some(r) = read(&device, 0x66) {
+                println!("Firmware (0x66) raw: {:02X?}", &r[1..]);
             }
         }
-
-        // Try muting sidetone via SetValue (0xCA) with ValueId=5 (SidetoneState)
-        "mute" => {
-            println!("Muting sidetone via SetValue (ValueId=5, value=1)...");
-            device.write(&[0xCA, 0x05, 0x01, 0x00, 0x00])?;
-            println!("Done. Is it silent now?");
-        }
-        "unmute" => {
-            println!("Unmuting sidetone via SetValue (ValueId=5, value=0)...");
-            device.write(&[0xCA, 0x05, 0x00, 0x00, 0x00])?;
-            println!("Done. Can you hear yourself?");
-        }
-
-        // Try setting sidetone level via SetValue with DIFFERENT ValueIds
-        // Maybe there's an undocumented ValueId for sidetone level
-        "sv" => {
-            let vid: u8 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(5);
-            let val: u8 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(0);
-            println!("SetValue: ValueId={vid}, value={val}");
-            device.write(&[0xCA, vid, val, 0x00, 0x00])?;
-            println!("Done.");
-        }
-
-        // Try different byte positions in the 0xFF report for the level
-        "probe" => {
-            let pos: usize = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(10);
-            let val: u8 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(0);
-            println!("0xFF feature report: level byte at position {pos} = {val}");
-            let mut payload = [0u8; 63];
-            payload[0] = 0x0B;
-            payload[2] = 0xFF;
-            payload[3] = 0x04;
-            payload[4] = 0x0E;
-            payload[5] = 0x01;
-            payload[6] = 0x05;
-            payload[7] = 0x01;
-            payload[8] = 0x04;
-            if pos < 63 {
-                payload[pos] = val;
-            }
-            let mut wire = vec![0xFFu8];
-            wire.extend_from_slice(&payload);
-            device.send_feature_report(&wire)?;
-            println!("Done.");
-        }
-
-        // Scan: try every byte position with value 0 to find which one controls level
-        "scan" => {
-            let val: u8 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(0);
-            println!("Scanning all byte positions with value={val}...");
-            println!("Listen for changes between each position.\n");
-            for pos in 0..20 {
-                let mut payload = [0u8; 63];
-                payload[0] = 0x0B;
-                payload[2] = 0xFF;
-                payload[3] = 0x04;
-                payload[4] = 0x0E;
-                payload[5] = 0x01;
-                payload[6] = 0x05;
-                payload[7] = 0x01;
-                payload[8] = 0x04;
-                // Override one position with the test value
-                payload[pos] = val;
-                let mut wire = vec![0xFFu8];
-                wire.extend_from_slice(&payload);
-                let _ = device.send_feature_report(&wire);
-                println!("  pos={pos:2}: sent byte {pos}={val} (header bytes may be overwritten)");
-                std::thread::sleep(Duration::from_secs(2));
+        "watch" => {
+            println!("Rapid polling — move mic boom, press buttons, etc.");
+            println!("Changed bytes shown in RED. Ctrl+C to stop.\n");
+            let mut last = Vec::new();
+            loop {
+                let _ = device.write(&[0xC9, 0x64]);
+                if let Some(r) = read(&device, 0x64) {
+                    let p = r[1..].to_vec();
+                    if p != last {
+                        for (i, b) in p.iter().enumerate() {
+                            let changed = last.get(i).is_some_and(|prev| prev != b);
+                            if changed { print!("\x1b[1;31m"); }
+                            print!("{b:02X}");
+                            if changed { print!("\x1b[0m"); }
+                            print!(" ");
+                        }
+                        let bat = p[1] & 0x7F;
+                        let mic = (p[1] >> 7) & 1;
+                        let link = p[2] & 0x0F;
+                        print!(" | bat={bat}% mic={mic} link={link}");
+                        println!();
+                        last = p;
+                    }
+                }
+                std::thread::sleep(Duration::from_millis(500));
             }
         }
-
         _ => {
-            println!("Sidetone debugger:");
-            println!("  corsair status");
-            println!("  corsair mute          — mute via SetValue");
-            println!("  corsair unmute        — unmute via SetValue");
-            println!("  corsair sv <id> <val> — send SetValue with any ValueId");
-            println!("  corsair probe <pos> <val> — send 0xFF report with val at byte position");
-            println!("  corsair scan <val>    — try every byte position (2s each)");
+            println!("  corsair status  — dump raw report data");
+            println!("  corsair watch   — rapid poll, highlight changes");
         }
     }
     Ok(())
