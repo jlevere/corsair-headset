@@ -9,96 +9,40 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-arm64:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install dependencies (hidapi)
-        run: brew install hidapi pkg-config
-
-      - name: Build release
-        run: cargo build --release -p corsair-tray -p corsair-cli
+      - uses: dtolnay/rust-toolchain@stable
+      - run: brew install hidapi pkg-config
 
       - name: Run tests
         run: cargo test --workspace
 
-      - name: Package binaries
-        run: |
-          mkdir -p dist
-          cp target/release/corsair-tray dist/
-          cp target/release/corsair dist/
-          # Create LaunchAgent plist
-          cat > dist/com.corsair-tray.plist << 'PLIST'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>Label</key>
-            <string>com.corsair-tray</string>
-            <key>ProgramArguments</key>
-            <array>
-              <string>/usr/local/bin/corsair-tray</string>
-            </array>
-            <key>RunAtLoad</key>
-            <true/>
-            <key>KeepAlive</key>
-            <dict>
-              <key>SuccessfulExit</key>
-              <false/>
-            </dict>
-            <key>StandardErrorPath</key>
-            <string>/tmp/corsair-tray.err</string>
-          </dict>
-          </plist>
-          PLIST
-          # Install script
-          cat > dist/install.sh << 'INSTALL'
-          #!/bin/bash
-          set -e
-          echo "Installing corsair-tray..."
-          sudo cp corsair-tray /usr/local/bin/
-          sudo cp corsair /usr/local/bin/
-          cp com.corsair-tray.plist ~/Library/LaunchAgents/
-          echo "Starting corsair-tray..."
-          launchctl load ~/Library/LaunchAgents/com.corsair-tray.plist
-          echo "Done! corsair-tray is running and will start at login."
-          echo "To uninstall: launchctl unload ~/Library/LaunchAgents/com.corsair-tray.plist"
-          INSTALL
-          chmod +x dist/install.sh
-          cd dist && tar czf ../corsair-tray-macos-arm64.tar.gz *
+      - name: Build .app and .dmg
+        run: make release
 
-      - name: Create Release
+      - name: Upload DMG
         uses: softprops/action-gh-release@v2
         with:
-          files: corsair-tray-macos-arm64.tar.gz
+          files: target/release/Corsair-Headset-*.dmg
           generate_release_notes: true
 
-  build-intel:
+  build-x86_64:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: brew install hidapi pkg-config
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install dependencies (hidapi)
-        run: brew install hidapi pkg-config
-
-      - name: Build release
-        run: cargo build --release -p corsair-tray -p corsair-cli
-
-      - name: Package binaries
+      - name: Build .app and .dmg
         run: |
-          mkdir -p dist
-          cp target/release/corsair-tray dist/
-          cp target/release/corsair dist/
-          cd dist && tar czf ../corsair-tray-macos-x86_64.tar.gz *
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
+          sed -i '' "s/VERSION := .*/VERSION := ${VERSION}/" Makefile
+          make release
+          mv target/release/Corsair-Headset-*.dmg target/release/Corsair-Headset-${VERSION}-x86_64.dmg
 
-      - name: Upload to Release
+      - name: Upload DMG
         uses: softprops/action-gh-release@v2
         with:
-          files: corsair-tray-macos-x86_64.tar.gz
+          files: target/release/Corsair-Headset-*-x86_64.dmg

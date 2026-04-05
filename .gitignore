@@ -5,9 +5,12 @@ web/dist
 web/pkg
 web/test-results
 
+# Release artifacts
+*.app
+*.dmg
+
 # RE workbench (large binaries and analysis output)
 work/
-*.dmg
 
 # Editor
 .direnv
