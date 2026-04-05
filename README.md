@@ -36,6 +36,12 @@ Currently tested on **VOID RGB Elite Wireless**. The protocol crate covers:
 
 Download the `.dmg` from [Releases](../../releases), open it, drag **Corsair Headset** to Applications.
 
+The app is unsigned, so macOS will block it on first run. Fix with:
+```bash
+xattr -cr /Applications/Corsair\ Headset.app
+```
+Or: right-click the app → Open → Open (bypasses Gatekeeper once).
+
 To start at login: System Settings → General → Login Items → add Corsair Headset.
 
 ### Build from source

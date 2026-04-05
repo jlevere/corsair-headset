@@ -217,17 +217,19 @@ fn main() -> anyhow::Result<()> {
             }
 
             // Host-controlled auto-sleep
-            if sleep_timeout_mins > 0 && was_connected {
-                if last_active.elapsed() >= Duration::from_secs(sleep_timeout_mins * 60) {
-                    tracing::info!("Inactivity timeout — triggering shutdown");
-                    headset.trigger_shutdown();
-                    last_active = Instant::now();
-                }
+            if sleep_timeout_mins > 0
+                && was_connected
+                && last_active.elapsed() >= Duration::from_secs(sleep_timeout_mins * 60)
+            {
+                tracing::info!("Inactivity timeout — triggering shutdown");
+                headset.trigger_shutdown();
+                last_active = Instant::now();
             }
         }
     });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn do_refresh(
     headset: &mut Headset,
     tray: &tray_icon::TrayIcon,
@@ -246,22 +248,20 @@ fn do_refresh(
         let connected = s.link == LinkInfo::Active;
 
         if connected != *was_connected {
-            let _ = tray.set_icon(Some(if connected {
-                icon_solid.clone()
-            } else {
-                icon_outline.clone()
-            }));
+            let icon = if connected { icon_solid } else { icon_outline };
+            let _ = tray.set_icon(Some(icon.clone()));
             *was_connected = connected;
         }
 
-        tray.set_title(Some(&match s.link {
+        let title = match s.link {
             LinkInfo::Active => format!("{}%", s.battery),
             _ => s.link.label().to_string(),
-        }));
+        };
+        tray.set_title(Some(&title));
 
-        battery_item.set_text(&fmt_battery(&Some(s.clone())));
-        mic_item.set_text(&fmt_mic(&Some(s.clone())));
-        link_item.set_text(&fmt_link(&Some(s.clone())));
+        battery_item.set_text(fmt_battery(&Some(s.clone())));
+        mic_item.set_text(fmt_mic(&Some(s.clone())));
+        link_item.set_text(fmt_link(&Some(s.clone())));
 
         if s.mic_boom_up != *mic_muted {
             *mic_muted = s.mic_boom_up;

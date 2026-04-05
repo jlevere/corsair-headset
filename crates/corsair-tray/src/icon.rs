@@ -57,9 +57,9 @@ const OUTLINE: [[u8; 18]; 18] = [
 
 fn bitmap_to_icon(bitmap: &[[u8; 18]; 18]) -> anyhow::Result<Icon> {
     let mut rgba = vec![0u8; (W * H * 4) as usize];
-    for y in 0..H as usize {
-        for x in 0..W as usize {
-            if bitmap[y][x] == 1 {
+    for (y, row) in bitmap.iter().enumerate() {
+        for (x, &pixel) in row.iter().enumerate() {
+            if pixel == 1 {
                 let off = (y * W as usize + x) * 4;
                 rgba[off] = 0;       // R
                 rgba[off + 1] = 0;   // G

@@ -105,6 +105,7 @@ impl Headset {
     }
 
     /// Whether the HID device is currently open.
+    #[allow(dead_code)]
     pub fn is_connected(&self) -> bool {
         self.device.is_some()
     }
@@ -169,30 +170,12 @@ impl Headset {
 
     /// Set EQ preset index (0–4).
     pub fn set_eq_preset(&mut self, index: u8) {
-        if let Some(device) = &self.device {
-            if let Some(r) = Report::with_payload(
-                ReportId::SetValue as u8,
-                &[ValueId::EqIndex as u8, index],
-            ) {
-                if device.write(&r.wire_bytes()).is_err() {
-                    self.handle_disconnect();
-                }
-            }
-        }
+        self.send_set_value(ValueId::EqIndex, index);
     }
 
     /// Toggle mic mute via SetValue.
     pub fn set_mic_mute(&mut self, muted: bool) {
-        if let Some(device) = &self.device {
-            if let Some(r) = Report::with_payload(
-                ReportId::SetValue as u8,
-                &[ValueId::MicState as u8, u8::from(muted)],
-            ) {
-                if device.write(&r.wire_bytes()).is_err() {
-                    self.handle_disconnect();
-                }
-            }
-        }
+        self.send_set_value(ValueId::MicState, u8::from(muted));
     }
 
     /// Trigger auto-shutdown (beep + power down).
@@ -206,6 +189,17 @@ impl Headset {
     }
 
     // --- Internal ---
+
+    fn send_set_value(&mut self, id: ValueId, value: u8) {
+        if let Some(device) = &self.device {
+            let report = Report::with_payload(ReportId::SetValue as u8, &[id as u8, value]);
+            if let Some(r) = report
+                && device.write(&r.wire_bytes()).is_err()
+            {
+                self.handle_disconnect();
+            }
+        }
+    }
 
     fn try_open() -> Option<hidapi::HidDevice> {
         let api = hidapi::HidApi::new().ok()?;
