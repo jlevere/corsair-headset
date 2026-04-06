@@ -298,7 +298,7 @@ dependencies = [
 
 [[package]]
 name = "corsair-cli"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -312,7 +312,7 @@ dependencies = [
 
 [[package]]
 name = "corsair-proto"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "serde",
  "thiserror 2.0.18",
@@ -320,7 +320,7 @@ dependencies = [
 
 [[package]]
 name = "corsair-transport"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "async-trait",
  "corsair-proto",
@@ -334,7 +334,7 @@ dependencies = [
 
 [[package]]
 name = "corsair-tray"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "corsair-proto",
