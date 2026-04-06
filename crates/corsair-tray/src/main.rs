@@ -3,6 +3,8 @@ use std::time::{Duration, Instant};
 use muda::{CheckMenuItem, Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu};
 use tao::event::Event;
 use tao::event_loop::{ControlFlow, EventLoopBuilder};
+#[cfg(target_os = "macos")]
+use tao::platform::macos::{ActivationPolicy, EventLoopExtMacOS};
 use tray_icon::{TrayIconBuilder, TrayIconEvent};
 
 mod headset;
@@ -113,7 +115,9 @@ fn main() -> anyhow::Result<()> {
     menu.append(&quit_item).unwrap();
 
     // Tray
-    let event_loop = EventLoopBuilder::new().build();
+    let mut event_loop = EventLoopBuilder::new().build();
+    #[cfg(target_os = "macos")]
+    event_loop.set_activation_policy(ActivationPolicy::Accessory);
     let icon_solid = icon::solid_icon()?;
     let icon_outline = icon::outline_icon()?;
     let connected = state.as_ref().is_some_and(|s| s.link == LinkInfo::Active);
