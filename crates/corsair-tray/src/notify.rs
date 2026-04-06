@@ -5,11 +5,10 @@
 
 use std::process::Command;
 
-/// Battery thresholds that trigger a notification.
 const WARNING_THRESHOLD: u8 = 15;
 const CRITICAL_THRESHOLD: u8 = 5;
 
-/// Tracks which battery alerts have already been shown to avoid spam.
+/// Tracks which battery alerts have been shown to avoid spam.
 pub struct BatteryNotifier {
     warned_15: bool,
     warned_5: bool,
@@ -25,12 +24,7 @@ impl BatteryNotifier {
         }
     }
 
-    /// Check battery level and show a notification if crossing a threshold.
-    ///
-    /// Only notifies once per threshold crossing. Resets when battery goes
-    /// above the threshold again (e.g., after charging).
     pub fn check(&mut self, battery: u8) {
-        // Reset warnings if battery went back up (charging)
         if battery > WARNING_THRESHOLD + 5 {
             self.warned_15 = false;
         }
@@ -38,7 +32,6 @@ impl BatteryNotifier {
             self.warned_5 = false;
         }
 
-        // Notify at 15%
         if battery <= WARNING_THRESHOLD
             && self.last_battery > WARNING_THRESHOLD
             && !self.warned_15
@@ -50,7 +43,6 @@ impl BatteryNotifier {
             );
         }
 
-        // Notify at 5%
         if battery <= CRITICAL_THRESHOLD
             && self.last_battery > CRITICAL_THRESHOLD
             && !self.warned_5
@@ -66,13 +58,15 @@ impl BatteryNotifier {
     }
 }
 
+fn escape_applescript(s: &str) -> String {
+    s.replace('\\', "\\\\").replace('"', "\\\"")
+}
+
 fn send_notification(title: &str, message: &str) {
-    // osascript always works on macOS, even for non-bundled apps.
-    let script = format!(
-        r#"display notification "{message}" with title "{title}""#,
-    );
-    let _ = Command::new("osascript")
-        .arg("-e")
-        .arg(&script)
-        .spawn();
+    let title = escape_applescript(title);
+    let message = escape_applescript(message);
+    let script = format!(r#"display notification "{message}" with title "{title}""#);
+    if let Err(e) = Command::new("osascript").arg("-e").arg(&script).spawn() {
+        tracing::warn!("Failed to send notification: {e}");
+    }
 }

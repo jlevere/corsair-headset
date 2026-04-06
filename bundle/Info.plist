@@ -19,14 +19,16 @@
 	<key>CFBundleShortVersionString</key>
 	<string>0.8.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>8</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
-	<key>NSHumanReadableCopyright</key>
-	<string>MIT / Apache-2.0</string>
 </dict>
 </plist>

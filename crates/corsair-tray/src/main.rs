@@ -33,7 +33,14 @@ const SLEEP_TIMEOUTS: &[(u64, &str)] = &[
 ];
 
 fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt().with_env_filter("info").init();
+    {
+        use tracing_subscriber::prelude::*;
+        let oslog = tracing_oslog::OsLogger::new("com.jlevere.corsair-headset", "default");
+        tracing_subscriber::registry()
+            .with(oslog)
+            .with(tracing_subscriber::filter::LevelFilter::INFO)
+            .init();
+    }
 
     let mut settings = settings::Settings::load();
     let mut headset = Headset::new();

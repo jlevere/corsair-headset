@@ -44,7 +44,7 @@
         # Assemble the macOS .app bundle
         corsair-app = pkgs.stdenv.mkDerivation {
           pname = "corsair-headset";
-          version = "0.6.0";
+          version = "0.8.0";
 
           src = ./bundle;
 
