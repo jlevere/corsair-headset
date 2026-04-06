@@ -55,6 +55,9 @@ bitflags = "2"
 # Directories
 dirs = "6"
 
+# macOS
+objc2-foundation = "0.3"
+
 # Tray / Menu bar
 tao = "0.35"
 tray-icon = "0.22"

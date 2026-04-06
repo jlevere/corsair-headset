@@ -126,7 +126,12 @@ fn main() -> anyhow::Result<()> {
     // Tray
     let mut event_loop = EventLoopBuilder::new().build();
     #[cfg(target_os = "macos")]
-    event_loop.set_activation_policy(ActivationPolicy::Accessory);
+    {
+        event_loop.set_activation_policy(ActivationPolicy::Accessory);
+        // Prevent macOS from killing us for having no windows open
+        objc2_foundation::NSProcessInfo::processInfo()
+            .disableAutomaticTermination(objc2_foundation::ns_string!("menu bar app"));
+    }
     let icon_solid = icon::solid_icon()?;
     let icon_outline = icon::outline_icon()?;
     let connected = state.as_ref().is_some_and(|s| s.link == LinkInfo::Active);
