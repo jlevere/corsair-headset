@@ -93,14 +93,16 @@ fn main() -> anyhow::Result<()> {
         ((255, 165, 0), "Orange"),
         ((255, 255, 0), "Yellow"),
     ];
+    let saved_led = settings.led_rgb();
     let mut led_items = Vec::new();
     for &(rgb, label) in led_colors {
-        let item = MenuItem::new(label, true, None);
+        let checked = saved_led.is_some_and(|s| s == [rgb.0, rgb.1, rgb.2]);
+        let item = CheckMenuItem::new(label, true, checked, None);
         led_sub.append(&item).unwrap();
         led_items.push((item, rgb));
     }
     led_sub.append(&PredefinedMenuItem::separator()).unwrap();
-    let led_off_item = MenuItem::new("Off", true, None);
+    let led_off_item = CheckMenuItem::new("Off", true, saved_led.is_none(), None);
     led_sub.append(&led_off_item).unwrap();
     menu.append(&led_sub).unwrap();
 
@@ -189,12 +191,18 @@ fn main() -> anyhow::Result<()> {
                 headset.set_led_off();
                 settings.led_color = None;
                 settings.save();
+                led_off_item.set_checked(true);
+                for (item, _) in &led_items { item.set_checked(false); }
             }
             for (id, (r, g, b)) in &led_ids {
                 if ev.id == *id {
                     headset.set_led_color(*r, *g, *b);
                     settings.set_led_rgb(*r, *g, *b);
                     settings.save();
+                    led_off_item.set_checked(false);
+                    for (item, rgb) in &led_items {
+                        item.set_checked(*rgb == (*r, *g, *b));
+                    }
                 }
             }
             if ev.id == sidetone_id {
