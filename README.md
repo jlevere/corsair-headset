@@ -6,11 +6,11 @@ macOS menu bar app for Corsair wireless headsets. Shows battery, controls EQ/sid
 
 ```
 brew tap jlevere/tap
-brew install --cask corsair-headset
-xattr -cr /Applications/Corsair\ Headset.app
+brew install corsair-headset
+brew services start corsair-headset
 ```
 
-To start at login: System Settings → General → Login Items → add Corsair Headset.
+Builds from source. The service starts at login automatically.
 
 ### From source
 
