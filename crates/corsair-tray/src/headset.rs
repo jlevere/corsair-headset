@@ -4,7 +4,6 @@ use std::time::{Duration, Instant};
 
 use corsair_proto::legacy::lighting::{self, LedZone};
 use corsair_proto::legacy::types::{ReportId, ValueId};
-use corsair_proto::Report;
 
 /// Headset handle with automatic reconnection on device loss.
 pub struct Headset {
@@ -163,8 +162,17 @@ impl Headset {
     /// Volume control requires CorsairAudioConfigService (not installed).
     /// We can only toggle it on/off via HID SetValue.
     pub fn set_sidetone(&mut self, enabled: bool) {
-        // ValueId 5 = SidetoneState: 0 = on, 1 = muted (inverted!)
-        self.send_set_value(ValueId::SidetoneState, u8::from(!enabled));
+        if enabled {
+            // Activate sidetone via 0xFF feature report (required after power cycle),
+            // then unmute via SetValue.
+            if let Some(device) = &self.device {
+                let report = corsair_proto::legacy::sidetone::encode_set_sidetone_level(100);
+                let _ = device.send_feature_report(&report.wire_bytes());
+            }
+            self.send_set_value(ValueId::SidetoneState, 0); // unmute
+        } else {
+            self.send_set_value(ValueId::SidetoneState, 1); // mute
+        }
     }
 
     /// Set EQ preset index (0–4).
@@ -222,10 +230,9 @@ impl Headset {
 
     fn send_set_value(&mut self, id: ValueId, value: u8) {
         if let Some(device) = &self.device {
-            let report = Report::with_payload(ReportId::SetValue as u8, &[id as u8, value]);
-            if let Some(r) = report
-                && device.write(&r.wire_bytes()).is_err()
-            {
+            // 0xCA requires 4 bytes payload per HID descriptor
+            let buf = [ReportId::SetValue as u8, id as u8, value, 0x00, 0x00];
+            if device.write(&buf).is_err() {
                 self.handle_disconnect();
             }
         }
@@ -242,6 +249,11 @@ impl Headset {
 
         let device = api.open_path(iface.path()).ok()?;
         device.set_blocking_mode(false).ok()?;
+
+        // Switch to Software mode so SetValue commands take effect
+        // 0xC8 requires 2 bytes payload per HID descriptor
+        let _ = device.write(&[0xC8, 0x01, 0x00]);
+
         Some(device)
     }
 
